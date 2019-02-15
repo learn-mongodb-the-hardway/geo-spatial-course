@@ -4,15 +4,19 @@
   "description": "The MongoDB Geo Spatial Course Application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint .",
+    "test": "mocha ./test/*"    
   },
   "author": "Christian Kvalheim",
   "license": "ISC",
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.5.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
-    "jade": "^1.11.0",
     "mongodb": "^3.1.13"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
   }
 }
