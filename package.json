@@ -1,0 +1,18 @@
+{
+  "name": "course-mongodb-geo",
+  "version": "1.0.0",
+  "description": "The MongoDB Geo Spatial Course Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Christian Kvalheim",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "jade": "^1.11.0",
+    "mongodb": "^3.1.13"
+  }
+}
