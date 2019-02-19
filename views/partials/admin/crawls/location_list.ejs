@@ -1,0 +1,21 @@
+<% if (typeof crawl != 'undefined' && typeof locations != 'undefined') { %>
+  <h3>Locations</h3>
+  <table class="table table-striped">
+    <thead class="thead-dark">
+      <th scope="col">#</th>
+      <th scope="col">Place Name</th>
+      <th scope="col"></th>
+    </thead>
+    <tbody>
+      <% locations.forEach((location, index) => { %>
+        <tr>
+          <td scope="row"><%= index + 1 %></td>
+          <td scope="row"><%= location.placeName %></td>
+          <td scope="row">
+            <a href="<%= url(`crawls/location/set/${crawl._id}/${encodeURIComponent(location.id)}`) %>">[Set]</a>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+  </table>
+<% } %>

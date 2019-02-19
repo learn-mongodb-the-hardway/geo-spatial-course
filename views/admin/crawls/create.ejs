@@ -16,8 +16,15 @@
           <% } else { %>
             <h2>Edit Pub Crawl</h2>
             <div id="mapid" style="width: 600px; height: 400px;"></div>
-            <% } %>
+          <% } %>
+
+          <hr/>
+
+          <% if (crawl._id == null) { %>
           <form action="<%= url('crawls/create') %>" method="post">   
+          <% } else { %>
+          <form action="<%= url(`crawls/update/${crawl._id}`) %>" method="post">   
+          <% } %>
             <div class="form-group">
               <label>Name</label>
               <input type="text" name="name" class="form-control" value="<%= crawl['name'] %>" placeholder="Pub crawl name"/><br/>
@@ -28,14 +35,48 @@
             </div>
             <% if (crawl._id == null) { %>
             <input type="submit" value="Create" class="btn btn-primary"/>
+            <% } else { %>
+            <input type="submit" value="Update" class="btn btn-primary"/>
             <% } %>
           </form>        
 
           <% if (crawl._id)  { %>
+            <hr/>
+
             <div id="pubs">
-                <% include ../../partials/admin/crawls/list %>
+                <% include ../../partials/admin/crawls/location_list %>
             </div>
-            <h3>Add A Pub</h3>
+
+            <h3>Start Location</h3>
+            <form action="<%= url(`crawls/location/find/${crawl._id}`) %>" method="post">
+              <div class="form-group row">
+                  <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="address" class="form-control" id="inputAddress" placeholder="Address">
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="inputPassword3" class="col-sm-2 col-form-label">Distance</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="distance" class="form-control" id="inputPassword3" placeholder="Distance in Meters, default 1000 m">
+                  </div>
+                </div>  
+                <div class="form-group row">
+                  <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                  </div>
+                </div>
+            </form>
+
+            <hr/>
+
+            <div id="pubs">
+                <% include ../../partials/admin/crawls/pub_list %>
+            </div>
+
+            <hr/>
+
+            <h3>Search Pubs</h3>
             <form action="<%= url(`crawls/pub/find/${crawl._id}`) %>" method="post">
               <div class="form-group row">
                 <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
