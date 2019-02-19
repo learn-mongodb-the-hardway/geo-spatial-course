@@ -1,0 +1,22 @@
+<form action="<%= url('create') %>" method="post">
+    <% if (errors['user']) { %><p><%= errors['user'] %></p><% } %>
+
+    <div>
+      <label>Username:</label>
+      <input type="text" name="username" value="<%= values['username'] %>"/><br/>
+      <% if (errors['username']) { %><p><%= errors['username'] %></p><% } %>
+    </div>
+    <div>
+      <label>Password:</label>
+      <input type="password" name="password" value="<%= values['password'] %>"/>
+      <% if (errors['password']) { %><p><%= errors['password'] %></p><% } %>
+    </div>
+    <div>
+      <label>Confirm Password:</label>
+      <input type="password" name="confirm_password" value="<%= values['confirm_password'] %>"/>
+      <% if (errors['confirm_password']) { %><p><%= errors['confirm_password'] %></p><% } %>
+    </div>
+      <div>
+      <input type="submit" value="Submit"/>
+    </div>
+  </form>

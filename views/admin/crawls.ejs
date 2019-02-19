@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>  
+  <head>
+      <% include ../partials/admin/head %>
+  </head>
+  <body class="container">
+    <header>
+      <% include ../partials/admin/header %>
+    </header>
+      
+    <main role="main" class="container">
+      <div class="row">
+          <div class="col-sm-4">    
+              <div class="jumbotron">
+                  <p>
+                      Username: <%= user.username %><br/>
+                      </p>
+                      <a href="<%= url('logout') %>">Log out</a>
+              </div>
+          </div>
+      
+          <div class="col-sm-8">        
+              <div class="well">
+                  <h3>Look I'm A Sidebar!</h3>
+              </div>
+          </div>      
+      </div>
+    </main>
+  </body>
+  
+  <footer>
+    <% include ../partials/admin/footer %>
+  </footer>
+</html>
+
