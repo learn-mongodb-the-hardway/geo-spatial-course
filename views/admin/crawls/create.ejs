@@ -77,7 +77,7 @@
           accessToken: '<%= options.accessToken %>',
           mapDivId: 'mapid',
           id: '<%= crawl._id %>',
-          url: '<%= url('crawls/pub') %>',
+          url: '<%= url("crawls/pub") %>',
           pubs: <%- JSON.stringify(crawl.pubs) %>,
           searchPubs: <%- JSON.stringify(pubs) %>
         });
