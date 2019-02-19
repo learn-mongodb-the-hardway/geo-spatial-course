@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>  
+  <head>
+      <% include ../../partials/admin/head %>
+  </head>
+  <body class="bg-light">
+    <header>
+      <% include ../../partials/admin/header %>
+    </header>
+      
+    <main role="main" class="container">
+      <section class="jumbotron text-left">
+        <div class="container">
+          <% if (crawl._id == null) { %>
+            <h2>Create New Pub Crawl</h2>
+          <% } else { %>
+            <h2>Edit Pub Crawl</h2>
+            <div id="mapid" style="width: 600px; height: 400px;"></div>
+            <% } %>
+          <form action="<%= url('crawls/create') %>" method="post">   
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" name="name" class="form-control" value="<%= crawl['name'] %>" placeholder="Pub crawl name"/><br/>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea name="description" class="form-control" placeholder="Pub crawl description"><%= crawl['description'] %></textarea>
+            </div>
+            <% if (crawl._id == null) { %>
+            <input type="submit" value="Create" class="btn btn-primary"/>
+            <% } %>
+          </form>        
+
+          <% if (crawl._id)  { %>
+            <div id="pubs">
+                <% include ../../partials/admin/crawls/list %>
+            </div>
+            <h3>Add A Pub</h3>
+            <form action="<%= url(`crawls/pub/find/${crawl._id}`) %>" method="post">
+              <div class="form-group row">
+                <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
+                <div class="col-sm-10">
+                  <input type="text" name="address" class="form-control" id="inputAddress" placeholder="Address">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="inputPassword3" class="col-sm-2 col-form-label">Distance</label>
+                <div class="col-sm-10">
+                  <input type="text" name="distance" class="form-control" id="inputPassword3" placeholder="Distance in Meters">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="inputPostCode" class="col-sm-2 col-form-label">Post&nbsp;Code</label>
+                <div class="col-sm-10">
+                  <input type="text" name="postcode" class="form-control" id="inputPostCode" placeholder="PostCode">
+                </div>
+              </div>
+              <div class="form-group row">
+                <div class="col-sm-10">
+                  <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+              </div>
+            </form>
+          <% } %>
+        </div>
+      </section>
+    </main>
+  </body>
+  
+  <footer>
+    <% include ../../partials/admin/footer %>
+    <% if (crawl._id != null) { %>
+      <script src="/static/shared.js"></script>
+      <script src="/static/admin_client.js"></script>
+      <script>
+        setup({
+          accessToken: '<%= options.accessToken %>',
+          mapDivId: 'mapid',
+          id: '<%= crawl._id %>',
+          url: '<%= url('crawls/pub') %>',
+          pubs: <%- JSON.stringify(crawl.pubs) %>,
+          searchPubs: <%- JSON.stringify(pubs) %>
+        });
+      </script>
+    <% } %>
+  </footer>
+</html>
+

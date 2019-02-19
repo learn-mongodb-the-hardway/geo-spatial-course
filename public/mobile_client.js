@@ -79,7 +79,7 @@ class Location {
  */
 function post(url, object, callback) {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'mobile/location');
+  xhr.open('POST', url);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onload = function() {
     if (xhr.status !== 200) {

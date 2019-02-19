@@ -1,11 +1,64 @@
 const { MongoClient } = require('mongodb');
-const { readFileSync } = require('fs');
+const { readFileSync, createReadStream } = require('fs');
+const readline = require('readline');
+
+// Import settings
+const uri = "mongodb://localhost:27017";
+const databaseName = "geo-spatial";
+const pubFile = "./london_pubs.geojson";
+const postCodeFile = "./postcodes.json";
 
 // Read the pub data and parse the json
-const geoJson = JSON.parse(readFileSync("./london_pubs.geojson"));
+const geoJson = JSON.parse(readFileSync(pubFile));
+var propertyNames = {};
 
-// Process all the features
-geoJson.features.forEach(feature => {
-  console.dir(feature)
+async function execute() {
+  const client = new MongoClient(uri, { useNewUrlParser: true });
+  await client.connect();
+  const db = client.db(databaseName);
+  const pubs = db.collection('pubs');
+  const postcodes = db.collection('postcodes');
+
+  // Drop existing collections
+  try { await pubs.drop() } catch (err) {};
+  try { await postcodes.drop() } catch (err) {};
+
+  // Process all the features
+  for (feature of geoJson.features) {
+    Object.keys(feature.properties).forEach(key => {
+      propertyNames[key] = true
+    });
+
+    var document = {
+      name: feature.properties['name'],
+      geometry: feature.geometry,
+      street: feature.properties["addr:street"],
+      housenumber: feature.properties["addr:housenumber"],
+      postcode: feature.properties["addr:postcode"],
+      city: feature.properties["addr:city"]
+    }
+
+    await pubs.insertOne(document);
+  }
+
+  // Read and insert geolines
+  await processPostCodes(postcodes);
+
+  // Stop client
+  client.close();
+}
+
+async function processPostCodes(postcodes) {
+  const lineReader = readline.createInterface({
+    input: createReadStream(postCodeFile)
+  });
+
+  for await (const line of lineReader) {
+    await postcodes.insertOne(JSON.parse(line));
+  }
+}
+
+execute().then(() => {
+
 });
 

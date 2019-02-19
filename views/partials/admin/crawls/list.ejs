@@ -1,0 +1,25 @@
+<% if (typeof crawl != 'undefined') { %>
+  <h3>Pubs in Crawl</h3>
+  <table class="table table-striped">
+    <thead class="thead-dark">
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Description</th>
+      <th scope="col"></th>
+    </thead>
+    <tbody>
+      <% crawl.pubs.filter(pub => { return pub != null }).forEach((pub, index) => { %>
+        <tr>
+          <td scope="row"><%= index + 1 %></td>
+          <td scope="row"><%= pub.name %></td>
+          <td scope="row"><%= address(pub) %></td>
+          <td scope="row">
+              <a href="<%= url(`crawls/pub/delete/${crawl._id}/${pub._id}`) %>">[Delete]</a>
+              <% if (index > 0) { %>
+                <a href="<%= url(`crawls/pub/moveup/${crawl._id}/${pub._id}`) %>">[Up]</a>
+              <% } %></td>
+        </tr>
+      <% }) %>
+      </tbody>
+  </table>
+<% } %>
