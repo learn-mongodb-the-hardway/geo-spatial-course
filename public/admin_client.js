@@ -44,6 +44,7 @@ function setup(options) {
 
   // Render any pubs in the walk
   options.pubs.forEach(function(pub, index) {
+    console.log("===== add pub")
     var markerOptions = {
       radius: 12, fillColor: "green", color: "#000",
       weight: 1, opacity: 1, fillOpacity: 0.8      
