@@ -70,3 +70,7 @@ function postJSON(url, object, options, callback) {
   xhr.send(JSON.stringify(object));
 }
 
+function setDiv(id, text) {
+  document.getElementById(id).innerHTML = text;
+}
+

@@ -1,0 +1,21 @@
+<h3>Available Pub Crawls</h3>
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <th scope="col">#</th>
+    <th scope="col">Title</th>
+    <th scope="col">Description</th>
+    <th scope="col"></th>
+  </thead>
+  <tbody>
+    <% crawls.forEach((crawl, index) => { %>
+      <tr>
+        <td scope="row"><%= index + 1 %></td>
+        <td scope="row"><%= crawl.name %></td>
+        <td scope="row"><%= crawl.description %></td>
+        <td scope="row">
+          <a href="/mobile/join/<%= crawl._id %>" class="btn btn-primary btn-sm active" role="button" aria-pressed="true">Join</a>
+        </td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>

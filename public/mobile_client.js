@@ -79,9 +79,9 @@ function getGeoLocation(callbacks) {
 function mobileSetup(options) {
   getGeoLocation([(err, location) => {
     // Get any pub crawls in your area
-    postJSON('/mobile', location, function(err, result) {
+    postJSON('/mobile', location, { parseJSON: false }, function(err, result) {
       if (err) return console.log(err);
-      console.log(result);
+      setDiv('crawls', result);
     });
 
 

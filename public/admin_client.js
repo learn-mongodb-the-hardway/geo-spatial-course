@@ -91,7 +91,3 @@ function addPub(options, pub) {
     setDiv("pubs", result);
   });
 }
-
-function setDiv(id, text) {
-  document.getElementById(id).innerHTML = text;
-}

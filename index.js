@@ -16,6 +16,12 @@ app.options('*', cors());
 app.set('view engine', 'ejs')
 app.use('/static', express.static('public'))
 
+// Set up basics
+app.use(require('cookie-parser')());
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('body-parser').json());
+app.use(require('express-session')({ secret: secret, resave: false, saveUninitialized: false }));
+
 // Database instance
 const client = MongoClient(mongoURI, { useNewUrlParser: true });
 
