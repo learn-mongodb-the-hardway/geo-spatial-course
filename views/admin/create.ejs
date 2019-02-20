@@ -1,22 +1,47 @@
-<form action="<%= url('create') %>" method="post">
-    <% if (errors['user']) { %><p><%= errors['user'] %></p><% } %>
+<!DOCTYPE html>
+<html>
 
-    <div>
-      <label>Username:</label>
-      <input type="text" name="username" value="<%= values['username'] %>"/><br/>
-      <% if (errors['username']) { %><p><%= errors['username'] %></p><% } %>
-    </div>
-    <div>
-      <label>Password:</label>
-      <input type="password" name="password" value="<%= values['password'] %>"/>
-      <% if (errors['password']) { %><p><%= errors['password'] %></p><% } %>
-    </div>
-    <div>
-      <label>Confirm Password:</label>
-      <input type="password" name="confirm_password" value="<%= values['confirm_password'] %>"/>
-      <% if (errors['confirm_password']) { %><p><%= errors['confirm_password'] %></p><% } %>
-    </div>
-      <div>
-      <input type="submit" value="Submit"/>
-    </div>
-  </form>
+<head>
+  <% include ../partials/admin/head %>
+</head>
+
+<body class="bg-light">
+  <header>
+    <% include ../partials/header %>
+  </header>
+
+  <main role="main" class="container">
+    <section class="jumbotron text-left">
+      <div class="container">
+        <form action="<%= url('create') %>" method="post">
+          <% if (errors['user']) { %><p><%= errors['user'] %></p><% } %>
+
+          <div class="form-group">
+            <label>Username:</label>
+            <input type="text" name="username" value="<%= values['username'] %>" class="form-control"/>
+            <% if (errors['username']) { %><p><%= errors['username'] %></p><% } %>
+          </div>
+          <div class="form-group">
+            <label>Password:</label>
+            <input type="password" name="password" value="<%= values['password'] %>" class="form-control"/>
+            <% if (errors['password']) { %><p><%= errors['password'] %></p><% } %>
+          </div>
+          <div class="form-group">
+            <label>Confirm Password:</label>
+            <input type="password" name="confirm_password" value="<%= values['confirm_password'] %>" class="form-control"/>
+            <% if (errors['confirm_password']) { %><p><%= errors['confirm_password'] %></p><% } %>
+          </div>
+          <div>
+            <input type="submit" value="Create" class="btn btn-primary"/>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+
+<footer>
+  <% include ../partials/footer	 %>
+</footer>
+
+</html>

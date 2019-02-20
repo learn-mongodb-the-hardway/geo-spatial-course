@@ -11,39 +11,45 @@
       <main role="main" class="container">
         <section class="jumbotron text-left">
           <div class="row">
-            <div class="col-sm-2">    
-              <p>
-                Username: <%= user.username %><br/>
-              </p>
-              <a href="<%= url('logout') %>">Log out</a>
+            <div class="well">
+              <h3>Pub Crawls</h3>
+              <table class="table table-striped">
+                <thead class="thead-dark">
+                  <th scope="col">Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Starting Location</th>
+                  <th scope="col">Start Time</th>
+                  <th scope="col">End Time</th>
+                  <th scope="col"></th>
+                </thead>
+                <tbody>
+                  <% documents.forEach(doc => { %>
+                    <tr>
+                      <td scope="row"><%= doc.name %></td>
+                      <td scope="row"><%= doc.description %></td>
+                      <td scope="row">
+                        <%= doc['location'] && doc['location']['placeName'] ? doc['location']['placeName'] : '' %>
+                      </td>
+                      <td scope="row">
+                        <%= doc['from'] ? moment(doc['from']).format('HH:mm MM/DD/YYYY') : '' %>
+                      </td>
+                      <td scope="row">
+                        <%= doc['to'] ? moment(doc['to']).format('HH:mm MM/DD/YYYY') : '' %>
+                      </td>
+                      <td scope="row">
+                        <a href="<%= url(`crawls/create/${doc._id}`) %>">[Edit]</a>
+                        <% if (!doc.published) { %>
+                          <a href="<%= url(`crawls/publish/${doc._id}`) %>">[Publish]</a>
+                        <% } %>
+                        <% if (doc.published) { %>
+                          <a href="<%= url(`crawls/unpublish/${doc._id}`) %>">[Un-Publish]</a>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                  </tbody>
+              </table>
             </div>
-        
-            <div class="col-sm-10">        
-              <div class="well">
-                <h3>Pub Crawls</h3>
-                <table class="table table-striped">
-                  <thead class="thead-dark">
-                    <th scope="col">Name</th>
-                    <th scope="col">Description</th>
-                    <th scope="col"></th>
-                  </thead>
-                  <tbody>
-                    <% documents.forEach(doc => { %>
-                      <tr>
-                        <td scope="row"><%= doc.name %></td>
-                        <td scope="row"><%= doc.description %></td>
-                        <td scope="row">
-                          <a href="<%= url(`crawls/create/${doc._id}`) %>">[Edit]</a>
-                          <% if (!doc.published) { %>
-                            <a href="">[Publish]</a>
-                          <% } %>
-                        </td>
-                      </tr>
-                    <% }) %>
-                    </tbody>
-                </table>
-              </div>
-            </div>      
         </div>
       </section>
     </main>

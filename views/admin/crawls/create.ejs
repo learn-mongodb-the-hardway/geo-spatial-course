@@ -28,11 +28,27 @@
             <div class="form-group">
               <label>Name</label>
               <input type="text" name="name" class="form-control" value="<%= crawl['name'] %>" placeholder="Pub crawl name"/><br/>
-            </div>
-            <div class="form-group">
               <label>Description</label>
               <textarea name="description" class="form-control" placeholder="Pub crawl description"><%= crawl['description'] %></textarea>
             </div>
+            <div class="form-group">
+              <label>Start Date</label>
+              <input id="fromdate" name="fromdate" width="276" value="<%= crawl['from'] ? moment(crawl['from']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
+            </div>
+            <div class="form-group">
+              <label>End Date</label>
+              <input id="todate" name="todate" width="276" value="<%= crawl['to'] ? moment(crawl['to']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
+            </div>
+            <% if (crawl.location != null) { %>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" class="form-control" value="<%= crawl.location['placeName'] %>" readonly/><br/>
+              <label>GEO Coordinates</label>
+              <input type="text" class="form-control" value="[<%= crawl.location.geometry.coordinates %>]" readonly/><br/>
+              <label>Distance in meters</label>
+              <input type="text" class="form-control" value="<%= crawl.locationDistance %>" readonly/><br/>
+            </div>
+            <% } %>
             <% if (crawl._id == null) { %>
             <input type="submit" value="Create" class="btn btn-primary"/>
             <% } else { %>
@@ -43,29 +59,29 @@
           <% if (crawl._id)  { %>
             <hr/>
 
-            <div id="pubs">
+            <div>
                 <% include ../../partials/admin/crawls/location_list %>
             </div>
 
             <h3>Start Location</h3>
             <form action="<%= url(`crawls/location/find/${crawl._id}`) %>" method="post">
               <div class="form-group row">
-                  <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
-                  <div class="col-sm-10">
-                    <input type="text" name="address" class="form-control" id="inputAddress" placeholder="Address">
-                  </div>
+                <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
+                <div class="col-sm-10">
+                  <input type="text" name="address" class="form-control" id="inputAddress" placeholder="Address">
                 </div>
-                <div class="form-group row">
-                  <label for="inputPassword3" class="col-sm-2 col-form-label">Distance</label>
-                  <div class="col-sm-10">
-                    <input type="text" name="distance" class="form-control" id="inputPassword3" placeholder="Distance in Meters, default 1000 m">
-                  </div>
-                </div>  
-                <div class="form-group row">
-                  <div class="col-sm-10">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                  </div>
+              </div>
+              <div class="form-group row">
+                <label for="inputPassword3" class="col-sm-2 col-form-label">Distance</label>
+                <div class="col-sm-10">
+                  <input type="text" name="distance" class="form-control" id="inputPassword3" placeholder="Distance in Meters, default 1000 m">
                 </div>
+              </div>  
+              <div class="form-group row">
+                <div class="col-sm-10">
+                  <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+              </div>
             </form>
 
             <hr/>
@@ -110,9 +126,11 @@
   
   <footer>
     <% include ../../partials/admin/footer %>
+      <script>
+        $('#fromdate').datetimepicker({ uiLibrary: 'bootstrap4', footer: true, modal: true });
+        $('#todate').datetimepicker({ uiLibrary: 'bootstrap4', footer: true, modal: true });
+      </script>
     <% if (crawl._id != null) { %>
-      <script src="/static/shared.js"></script>
-      <script src="/static/admin_client.js"></script>
       <script>
         setup({
           accessToken: '<%= options.accessToken %>',
@@ -120,7 +138,9 @@
           id: '<%= crawl._id %>',
           url: '<%= url("crawls/pub") %>',
           pubs: <%- JSON.stringify(crawl.pubs) %>,
-          searchPubs: <%- JSON.stringify(pubs) %>
+          searchPubs: <%- JSON.stringify(pubs) %>,
+          location: <%- JSON.stringify(crawl.location || {}) %>,
+          locationDistance: <%- crawl.locationDistance || 1000 %>
         });
       </script>
     <% } %>

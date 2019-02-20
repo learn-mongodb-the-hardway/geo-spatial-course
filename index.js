@@ -1,6 +1,7 @@
 const express = require('express');
 const { readFileSync } = require('fs');
 const { MongoClient } = require('mongodb');
+const cors = require('cors');
 
 // Startup variables
 const accessToken = readFileSync('./token.txt', 'utf8'); // Access token for map-box
@@ -10,6 +11,8 @@ const secret = 'session password..';
 
 // Express application and setups
 const app = express();
+app.use(cors());
+app.options('*', cors());
 app.set('view engine', 'ejs')
 app.use('/static', express.static('public'))
 
@@ -21,8 +24,19 @@ const mobile = require('./lib/mobile/index');
 const admin = require('./lib/admin/index');
 
 // Connect to the database
-client.connect((err, client) => {
+client.connect(async (err, client) => {
   if (err) throw err;
+
+  // Ensure geo indexes
+  try {
+    await client.db(databaseName).collection('pubs').createIndex({ geometry: "2dsphere" });
+  } catch (err) {}
+  try {
+    await client.db(databaseName).collection('postcodes').createIndex({ geometry: "2dsphere" });
+  } catch (err) {}
+  try {
+    await client.db(databaseName).collection('crawls').createIndex({ "location.geometry": "2dsphere" });
+  } catch (err) {}
 
   // Global options
   const globalOptions = {
