@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html>
-    <% include ../partials/header %>
-
   <head>
-      <script src="/static/mobile_client.js" type='text/javascript'></script>
+    <% include ../partials/mobile/head %>
   </head>
+
+  <header>
+    <% include ../partials/mobile/header %>
+  </header>
+
   <body>
-      <div id="mapid" style="width: 600px; height: 400px;"></div>
+    <div id="mapid" style="width: 600px; height: 400px;"></div>
   </body>
 
-  <% include ../partials/footer %>
+  <footer>
+    <% include ../partials/mobile/footer %>
+  </footer>
+
+  <script>
+    mobileSetup({
+      mapDivId: 'mapid',
+      accessToken: '<%= options.accessToken %>'
+    });
+  </script>
 </html>

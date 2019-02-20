@@ -37,6 +37,9 @@ client.connect(async (err, client) => {
   try {
     await client.db(databaseName).collection('crawls').createIndex({ "location.geometry": "2dsphere" });
   } catch (err) {}
+  try {
+    await client.db(databaseName).collection('crawls').createIndex({ "location.polygon": "2dsphere" });
+  } catch (err) {}
 
   // Global options
   const globalOptions = {
