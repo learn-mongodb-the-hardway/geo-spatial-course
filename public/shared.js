@@ -21,7 +21,7 @@ class Location {
   }
 }
 
-function retrieveGeoLocation(callbacks) {
+function getGeoLocation(callback) {
   var geoSuccess = function(position) {
     var location = new Location({
       accuracy: position.coords.accuracy,
@@ -33,16 +33,11 @@ function retrieveGeoLocation(callbacks) {
       timestamp: position.timestamp
     });
 
-    // If the location has not changed don't post
-    return callbacks.forEach(callback => {
-      callback(null, location);
-    });
+    callback(null, location);
   }
 
   var geoError = function(error) {
-    callbacks.forEach(callback => {
-      callback(error);
-    });
+    callback(error);
   }
 
   navigator.geolocation.getCurrentPosition(geoSuccess, geoError);

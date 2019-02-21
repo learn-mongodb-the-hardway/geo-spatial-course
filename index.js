@@ -2,12 +2,21 @@ const express = require('express');
 const { readFileSync } = require('fs');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 // Startup variables
 const accessToken = readFileSync('./token.txt', 'utf8'); // Access token for map-box
 const mongoURI = 'mongodb://localhost:27017';
 const databaseName = 'geo-spatial';
 const secret = 'session password..';
+
+// Create session store
+const store = new MongoDBStore({
+  uri: 'mongodb://localhost:27017/connect_mongodb_session_test',
+  databaseName: databaseName,
+  collection: 'sessions'
+});
 
 // Express application and setups
 const app = express();
@@ -20,7 +29,15 @@ app.use('/static', express.static('public'))
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('body-parser').json());
-app.use(require('express-session')({ secret: secret, resave: false, saveUninitialized: false }));
+app.use(require('express-session')({ 
+  secret: secret, 
+  resave: true,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+  },
+  store: store,
+  saveUninitialized: true 
+}));
 
 // Database instance
 const client = MongoClient(mongoURI, { useNewUrlParser: true });
@@ -28,6 +45,11 @@ const client = MongoClient(mongoURI, { useNewUrlParser: true });
 // Application modules
 const mobile = require('./lib/mobile/index');
 const admin = require('./lib/admin/index');
+
+// Catch store errors
+store.on('error', error => {
+  console.err(error);
+});
 
 // Connect to the database
 client.connect(async (err, client) => {

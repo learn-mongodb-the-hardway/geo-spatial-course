@@ -1,147 +1,158 @@
-/**
- * Global variables
- */
-var geoOptions = {
-  // Max wait time in ms before timing out the location request
-  timeout: 10000,
-  // The maximum age of cached geo location data in ms
-  maximumAge: 5 * 60 * 1000,
-  // Enable high accuracy mode
-  enableHighAccuracy: true
-}
-
-var mymap = null;
-var intervalId = null;
-var currentLocation = null;
-var currentPositionMarker = null;
-
-function getGeoLocation(callbacks) {
-  var geoSuccess = function(position) {
-    var location = new Location({
-      accuracy: position.coords.accuracy,
-      altitude: position.coords.altitude,
-      altitudeAccuracy: position.coords.altitudeAccuracy,
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      speed: position.coords.speed,
-      timestamp: position.timestamp
-    });
-
-    // // If the location has not changed don't post
-    // if (location.equals(currentLocation)) {
-    //   return callbacks.forEach(callback => {
-    //     callback(null, currentLocation);
-    //   });
-    // }
-
-    callbacks.forEach(callback => {
-      callback(null, location);
-    });
-    
-
-    // // Post the current location
-    // post("/mobile/location", location, (error, result) => {
-    //   // Let callbacks know
-    //   callbacks.forEach(callback => {
-    //     if (error) return callback(error);
-    //     callback(null, new Location(result));
-    //   });
-    // });
-  }
-
-  var geoError = function(error) {
-    callbacks.forEach(callback => {
-      callback(error);
-    });
-  }
-
-  navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
-}
-
 // /**
-//  * Simple AJAX POST method
+//  * Global variables
 //  */
-// function post(url, object, callback) {
-//   var xhr = new XMLHttpRequest();
-//   xhr.open('POST', url);
-//   xhr.setRequestHeader('Content-Type', 'application/json');
-//   xhr.onload = function() {
-//     if (xhr.status !== 200) {
-//       return callback('Request failed.  Returned status of ' + xhr.status);
-//     }
-
-//     callback(null, JSON.parse(xhr.responseText));
-//   };
-
-//   xhr.send(JSON.stringify(object));
+// var geoOptions = {
+//   // Max wait time in ms before timing out the location request
+//   timeout: 10000,
+//   // The maximum age of cached geo location data in ms
+//   maximumAge: 5 * 60 * 1000,
+//   // Enable high accuracy mode
+//   enableHighAccuracy: false
 // }
 
+var PubCrawlClient = function(options) {
+  this.mymap = null;
+  this.currentLocation = null;
+  this.currentLocationMarker = null;
+  this.intervalId = null;
+  this.options = options;
+  
+  // current look up pub index
+  this.nextPubIndex = 0;
+}
+
+PubCrawlClient.prototype.setup = function(callback) {
+  var self = this;
+
+  getGeoLocation((err, location) => {
+    if (err) {
+      return alert(err);
+    }
+
+    // Unpack fields
+    this.pubs = this.options.pubCrawl && this.options.pubCrawl.pubs
+      ? this.options.pubCrawl.pubs
+      : [];
+
+    // Save the current location
+    this.currentLocation = [location.latitude, location.longitude];
+    // Create the mapbox view
+    this.mymap = L.map(this.options.mapDivId).setView(this.currentLocation, 18);
+    // Set up the map
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + this.options.accessToken, {
+      maxZoom: 18,
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      id: 'mapbox.streets'
+    }).addTo(this.mymap);
+
+    // Create the current marker
+    this.currentLocationMarker = L.marker(this.currentLocation);
+    this.currentLocationMarker.addTo(this.mymap);
+
+    // Render all the pub crawl pubs
+    this.pubs.forEach(function(pub, index) {
+      var markerOptions = {
+        radius: 12, fillColor: "green", color: "#000",
+        weight: 1, opacity: 1, fillOpacity: 0.8      
+      }
+
+      L.geoJSON(pub.geometry, {
+        pointToLayer: function(feature, latlng) {
+          return L.circleMarker(latlng, markerOptions);
+        },
+        onEachFeature: function(feature, layer) {
+          layer.bindTooltip("" + index + ". " + pub.name);
+        }
+      }).addTo(self.mymap);
+    });
+
+    // Invalidate size
+    this.invalidateSize();
+
+    // Update the attendant lcoation
+    updateAttendantLocation(self.currentLocation);
+
+    // Start current location update
+    this.intervalId = setInterval(updateLocation(this), 1000);
+  });
+}
+
+function updateLocation(self) {
+  return function() {
+    getGeoLocation((err, location) => {
+      if (err) return;
+      // Skip everything if the location is the same
+      if (location.latitude == self.currentLocation[0]
+          && location.longitude == self.currentLocation[1]) {
+            return;
+          }
+
+      // Save the current location
+      self.currentLocation = [location.latitude, location.longitude];
+      // Update the current marker location
+      self.currentLocationMarker.setLatLng(L.latLng(self.currentLocation));
+      // Update the attendant lcoation
+      updateAttendantLocation(self.currentLocation);
+    });  
+  }
+}
+
+function updateAttendantLocation(coordinates) {
+  postJSON('/mobile/location', {
+    latitude: coordinates[0],
+    longitude: coordinates[1]
+  }, { parseJSON: false }, function(err, result) {});
+}
+
+PubCrawlClient.prototype.invalidateSize = function() {
+  if (this.mymap) {
+    this.mymap.invalidateSize();
+  }
+}
+
+PubCrawlClient.prototype.centerNextPub = function() {
+  if (this.pubs.length) {
+    // Get this or next index
+    var pubIndex = this.nextPubIndex++ % this.pubs.length;
+    // Get the next pub
+    var pub = this.pubs[pubIndex];
+    // Center the map on the pub
+    this.mymap.flyTo(extractPubPoint(pub), this.mymap.getZoom());
+  }    
+}
+
+function extractPubPoint(pub) {
+  // Get the first element
+  if (pub.geometry.type == "Point") {
+    var coordinates = [
+      pub.geometry.coordinates[1], 
+      pub.geometry.coordinates[0]];  
+  } else {
+    var coordinates = [
+      pub.geometry.coordinates[0][0][1], 
+      pub.geometry.coordinates[0][0][0]];
+  }
+
+  return L.latLng(coordinates);
+}
+
+PubCrawlClient.prototype.center = function() {
+  if (this.currentLocation) {
+    // Upate the marker with the current location
+    this.currentLocationMarker.setLatLng(this.currentLocation);    
+    // Center the map on the current location marker
+    this.mymap.setView(this.currentLocationMarker.getLatLng(),this.mymap.getZoom()); 
+  }
+}
+
 function mobileSetup(options) {
-  getGeoLocation([(err, location) => {
+  getGeoLocation((err, location) => {
     // Get any pub crawls in your area
     postJSON('/mobile', location, { parseJSON: false }, function(err, result) {
       if (err) return console.log(err);
       setDiv('crawls', result);
     });
-
-
-    // // Set default coordinates
-    // currentLocation = new Location({ latitude: 51.505, longitude: -0.09 });
-    // if (result) {
-    //   currentLocation = result;
-    // }
-
-    // // Create the mapbox view
-    // mymap = L.map(options.mapDivId).setView(currentLocation.toArray(), 18);
-
-    // // Set up the map
-    // L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + options.accessToken, {
-    //   maxZoom: 18,
-    //   attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-    //     '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-    //     'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    //   id: 'mapbox.streets'
-    // }).addTo(mymap);
-
-    // // Set the marker for the current location
-    // currentPositionMarker = L.marker(currentLocation.toArray());
-    // // Add marker to the map
-    // currentPositionMarker.addTo(mymap);
-
-    // // Setup the interval check
-    // intervalId = setInterval(executeInterval, options.intervalMS);
-  }]);
-}
-
-function locationsEqual(location1, location2) {
-  return location1.equals(location2);
-}
-
-// Run the GeoLocation month
-function executeInterval() {
-  getGeoLocation([(err, result) => {
-    if(err != null) return;
-
-    // If we have the same location don't do anything
-    if (locationsEqual(currentLocation, result)) {
-      return;
-    }
-
-    // Remove the current marker
-    if (currentLocation && currentPositionMarker) {
-      currentPositionMarker.removeFrom(mymap);
-    }
-
-    // Save the current location
-    currentLocation = result;
-
-    // Create a new marker
-    currentPositionMarker = L.marker(currentLocation.toArray());
-    currentPositionMarker.addTo(mymap);
-
-    // Fly to the map location
-    mymap.flyTo(
-      L.latLng(currentLocation.toArray()[0], currentLocation.toArray()[1]), 
-      mymap.getMaxZoom());
-  }]);
+  });
 }

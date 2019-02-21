@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ../partials/mobile/head %>
+    <style>
+      #mapid { height: calc(100% - 60px); width: 100%; position: absolute !important; }
+    </style>
+  </head>
+
+  <header>
+    <% include ../partials/mobile/header %>
+  </header>
+
+  <body>
+    <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+      <div class="container">
+        <button id="centermap" class="btn btn-primary">Center</button>
+        <button id="nextpub" class="btn btn-primary">Next Pub</button>
+        <a href="/mobile/leave" id="leavecrawl" class="btn btn-primary" role="button" aria-disabled="true">Leave</a>
+      </div>
+    </nav>
+    <div id="mapid" ></div>
+  </body>
+
+  <footer>
+    <% include ../partials/mobile/footer %>
+  </footer>
+
+  <script>
+    // Create pub crawl client
+    var pubcrawlClient = new PubCrawlClient({
+      mapDivId: 'mapid',
+      accessToken: '<%= options.accessToken %>',
+      pubCrawl: <%- JSON.stringify(doc) %>
+    });
+
+    // Peform the setup
+    pubcrawlClient.setup();
+
+    // Bind buttons
+    $('#centermap').on('click', function() {
+      pubcrawlClient.center();
+    });
+
+    $('#nextpub').on('click', function() {
+      pubcrawlClient.centerNextPub();
+    });
+  </script>
+</html>

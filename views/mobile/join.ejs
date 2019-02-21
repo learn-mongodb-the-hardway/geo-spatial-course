@@ -26,33 +26,80 @@
       <div class="tab-content" id="pills-tabContent">
 
         <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-          <form action="<%= url('login') %>" method="post">
+          <% if (Object.keys(errors).length == 1 && errors['error']) { %>
+            <div class="alert alert-warning" role="alert"><%= errors['error'] %></div>
+          <% } %>
+          <form action="<%= url(`login/${doc._id}`) %>" method="post" class="needs-validation" novalidate>
             <div class="form-group">
-              <label>Username</label>
-              <input type="text" name="username" class="form-control" value="" placeholder="User name" /><br />
-              <label>Password</label>
-              <input type="password" name="password" class="form-control" value="" placeholder="User name" /><br />
+              <label for="username">Username</label>
+              <input type="text" id="username" name="username" class="form-control" value="<%= values['username'] %>" placeholder="User name" required/>
+              <div class="invalid-feedback">
+                Username must be filled out.
+              </div>
             </div>
-            <input type="submit" value="Login" class="btn btn-primary" />
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" class="form-control" value="<%= values['password'] %>" placeholder="Password" required/>
+              <div class="invalid-feedback">
+                Password must be filled out.
+              </div>
+            </div>
+            <input type="submit" value="Submit" class="btn btn-primary" />
           </form>
         </div>
 
         <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-          <form action="<%= url('join') %>" method="post">
+          <% if (Object.keys(errors).length == 1 && errors['error']) { %>
+            <div class="alert alert-warning" role="alert"><%= errors['error'] %></div>
+          <% } %>
+          <form action="<%= url(`join/${doc._id}`) %>" method="post" class="needs-validation" novalidate>
             <div class="form-group">
               <label>Name</label>
-              <input type="text" name="name" class="form-control" value="" placeholder="Full name" /><br />
-              <label>Username</label>
-              <input type="text" name="username" class="form-control" value="" placeholder="User name" /><br />
-              <label>Password</label>
-              <input type="password" name="password" class="form-control" value="" placeholder="User name" /><br />
+              <input type="text" name="name" class="form-control" value="" placeholder="Full name" required/>
+              <div class="invalid-feedback">
+                Name must be filled out.
+              </div>
             </div>
-            <input type="submit" value="Join" class="btn btn-primary" />
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" name="username" class="form-control" value="" placeholder="User name" required/>
+              <div class="invalid-feedback">
+                Username must be filled out.
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" class="form-control" value="" placeholder="User name" required/>
+              <div class="invalid-feedback">
+                Password must be filled out.
+              </div>
+            </div>
+            <input type="submit" value="Submit" class="btn btn-primary" />
           </form>
         </div>
-
       </div>
   </body>
+
+  <script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+  </script>
 
   <footer>
     <% include ../partials/mobile/footer %>
