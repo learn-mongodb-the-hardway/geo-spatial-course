@@ -21,7 +21,6 @@ describe("Map Box Tests", () => {
   it("should correctly encode address", async () => {
     const service = new MapBoxServices(accessToken);
     var results = await service.geoCode("Calle Doctor Casal 16, Oviedo, Asturias");
-    console.dir(results)
     assert.notEqual(results, null);
   });
 });

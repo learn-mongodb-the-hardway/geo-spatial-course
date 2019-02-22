@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "lint": "eslint .",
-    "test": "mocha ./test/*"
+    "test": "mocha ./test/**/*"
   },
   "author": "Christian Kvalheim",
   "license": "ISC",
@@ -27,6 +27,10 @@
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "chai": "^4.2.0",
+    "jsdom": "^13.2.0",
+    "mocha": "^5.2.0",
+    "mock-req-res": "^1.0.3",
+    "sinon": "^7.2.4"
   }
 }

@@ -76,6 +76,16 @@ client.connect(async (err, client) => {
     secret: secret
   }
 
+  // Add the additional fields to the request
+  app.use((req, res, next) => {
+    req.db = client.db(databaseName);
+    req.options = {
+      accessToken: accessToken, secret: secret
+    }
+
+    next();
+  });
+
   //
   // Add module Routers
   app.use('/mobile', mobile(globalOptions));
