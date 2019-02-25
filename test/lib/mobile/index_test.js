@@ -23,7 +23,7 @@ var attendant = null;
 const { indexGet, indexPost } = require('../../../lib/mobile/routes/index');
 const { locationPost } = require('../../../lib/mobile/routes/location');
 const { leaveGet } = require('../../../lib/mobile/routes/leave');
-const { joinGet } = require('../../../lib/mobile/routes/join');
+const { joinGet, joinPost } = require('../../../lib/mobile/routes/join');
 
 if (accessToken == null) {
   accessToken = readFileSync(`${__dirname}/../../../token.txt`, 'utf8');
@@ -256,6 +256,7 @@ describe("Mobile Tests", () => {
         }, session: {
           loggedIn: true, userId: attendantId, crawlId: crawlId
         }, options: {}})
+
         const res = mockResponse({ send: async function(object) {
           result = object;
         }});
@@ -263,7 +264,7 @@ describe("Mobile Tests", () => {
         // Execute the indexGet
         await locationPost(req, res)
 
-        // Grab the attendant doc
+        // Grab the docs
         const attendantDoc = await attendant.findById(attendantId);
         const crawlDoc = await crawl.findById(crawlId);
 
@@ -303,6 +304,7 @@ describe("Mobile Tests", () => {
         const req = mockRequest({ db: database, baseUrl: '/', session: {
           loggedIn: true, userId: attendantId, crawlId: crawlId
         }, options: {}})
+
         const res = mockResponse({ redirect: async function(link) {
           result = link;
         }});
@@ -404,6 +406,76 @@ describe("Mobile Tests", () => {
         // Assertions
         assert.equal('/', result);
         assert.deepEqual([attendantId], crawlDoc.attendants);
+      });
+    });
+
+    describe("post", () => {
+      it("Posting with all fields missing", async () => {
+        // Create mock req/res
+        const req = mockRequest({ db: database, baseUrl: '/', session: {
+          loggedIn: true, userId: attendantId
+        }, params: {
+          crawlId: crawlId
+        }, body: {
+        }, options: {}})
+
+        const res = mockResponse({ render: async function(template, object = {}) {
+          const result = await ejs.renderFile(`views/${template}`, object);
+          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+            window.mobileSetup = () => {
+              mobileSetupExecuted = true;
+            }
+          }});
+
+          // Do assertions
+          assert.equal(true, doc.window.document.querySelector("#join_name").classList.contains('is-invalid'));
+          assert.equal(true, doc.window.document.querySelector("#join_username").classList.contains('is-invalid'));
+          assert.equal(true, doc.window.document.querySelector("#join_password").classList.contains('is-invalid'));
+        }});
+  
+        // Execute the action
+        await joinPost(req, res)
+      });
+
+      it("Posting with all fields present", async () => {
+        var result = null;
+
+        // Create mock req/res
+        const req = mockRequest({ db: database, baseUrl: '/', session: {
+          loggedIn: true, userId: attendantId
+        }, params: {
+          crawlId: crawlId
+        }, body: {
+          name: "integration peter", username: "integration_peter", password: "integration_peter"
+        }, options: {}})
+
+        const res = mockResponse({ redirect: async function(link) {
+          result = link;
+        }});
+  
+        // Execute the action
+        await joinPost(req, res)
+
+        // Grab the docs
+        const attendantDoc = await attendant.findByUsername("integration_peter");
+        const crawlDoc = await crawl.findById(crawlId);
+
+        // console.dir(attendantDoc)
+        // console.dir(crawlDoc)
+
+        // Assert redirect
+        assert.equal('/', result);
+
+        // Attendant assertions
+        assert(attendantDoc);
+        assert.equal('integration peter', attendantDoc.name);
+        assert.equal('integration_peter', attendantDoc.username);
+        assert(attendantDoc.password);
+        assert(attendantDoc.createdOn);
+
+        // Crawl assertions
+        assert(crawlDoc);
+        assert(crawlDoc.attendants.indexOf(attendantDoc._id != -1));
       });
     });
   });
