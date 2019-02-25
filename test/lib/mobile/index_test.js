@@ -4,7 +4,9 @@ const ejs = require('ejs');
 const { MongoClient, ObjectId } = require('mongodb');
 const { mockRequest, mockResponse } = require('mock-req-res')
 const { Crawl } = require('../../../lib/models/crawl');
+const { Pub } = require('../../../lib/models/pub');
 const { User } = require('../../../lib/models/user');
+const { Attendant } = require('../../../lib/models/attendant');
 const { JSDOM } = require("jsdom");
 
 // Check if env has been set
@@ -15,6 +17,7 @@ var client = null;
 var database = null;
 var crawl = null;
 var user = null;
+var attendant = null;
 
 // Routes
 const { indexGet, indexPost } = require('../../../lib/mobile/routes/index');
@@ -27,13 +30,21 @@ if (accessToken == null) {
 describe("Mobile Tests", () => {
 
   before(async () => {
-    client = MongoClient(url, { useNewUrlParser: true });
-    await client.connect();
+    // Connect to mongodb
+    client = await (MongoClient(url, { useNewUrlParser: true })).connect();
+    // Get and drop the test database
     database = client.db(databaseName);
     await database.dropDatabase();
+
+    // Create model wrappers
     crawl = new Crawl(database.collection('crawls'));
     user = new User(database.collection('users'));
+    pub = new Pub(database.collection('pubs'));
+    attendant = new Attendant(database.collection('attendants'));
+
+    // Create indexes
     await database.collection('crawls').createIndex({ 'location.polygon': "2dsphere" });
+    await database.collection('pubs').createIndex({ geometry: "2dsphere" });
   });
 
   after(async () => {
@@ -171,6 +182,23 @@ describe("Mobile Tests", () => {
   });
 
   describe("/location Route", () => {
+    const pubId = ObjectId();
+    const pubDoc = {"_id": pubId, "name":"The Queens","geometry":{"type":"Polygon","coordinates":[[[-0.1218882,51.5810518],[-0.1219419,51.5810068],[-0.1219536,51.5810117],[-0.1219916,51.5809767],[-0.1219826,51.580973],[-0.1220343,51.580927],[-0.1218916,51.5808583],[-0.1218425,51.5809018],[-0.1217803,51.5808749],[-0.1217738,51.5808807],[-0.1217312,51.5808607],[-0.1216892,51.5808951],[-0.1217341,51.5809162],[-0.1217098,51.5809379],[-0.1217686,51.5809633],[-0.1217486,51.5809798],[-0.121829,51.5810605],[-0.1218543,51.5810729],[-0.1218769,51.5810713],[-0.1218879,51.5810641],[-0.1218882,51.5810518]]]},"street":null,"housenumber":null,"postcode":null,"city":null};
+    const secondPubId = ObjectId();
+    const secondPubDoc = {"_id":secondPubId,"name":"The Ship and Shovell","geometry":{"type":"MultiPolygon","coordinates":[[[[-0.124766,51.5076021],[-0.1246849,51.5076631],[-0.1248584,51.507758],[-0.1249074,51.5077181],[-0.1248682,51.5077001],[-0.1248285,51.5076779],[-0.1248623,51.5076516],[-0.124766,51.5076021]]],[[[-0.1247432,51.5075838],[-0.124657,51.5075369],[-0.1246427,51.507547],[-0.1246632,51.5075582],[-0.1246498,51.507569],[-0.1246286,51.5075559],[-0.1246139,51.5075658],[-0.1246552,51.5075872],[-0.1246379,51.5075982],[-0.1246862,51.5076231],[-0.1247432,51.5075838]]]]},"street":null,"housenumber":null,"postcode":null,"city":null};
+    const attendantId = ObjectId();
+    const crawlId = ObjectId();
+
+    before(async () => {
+      // Create two pubs
+      await pub.create(pubDoc._id, pubDoc.name, pubDoc.geometry, pubDoc.street, pubDoc.housenumber, pubDoc.postcode, pubDoc.city, {});
+      await pub.create(secondPubDoc._id, secondPubDoc.name, secondPubDoc.geometry, secondPubDoc.street, secondPubDoc.housenumber, secondPubDoc.postcode, secondPubDoc.city, {});
+      // Create an attendant
+      await attendant.create(attendantId, "peter", "peter", "password", "password", {});
+      // Create a new pub crawl
+      await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], 
+        {"location":{"polygon":{"type":"Polygon","coordinates":[[[-0.105026,51.54289315284119],[-0.10784387906053175,51.542720510333936],[-0.11055340651085396,51.54220922120916],[-0.11305040409292269,51.54137894496253],[-0.11523887843091213,51.54026160501795],[-0.11703471535614414,51.538900159433894],[-0.1183689142408354,51.5373469471079],[-0.11919023776292799,51.53566167348195],[-0.11946717556292472,51.53390911360477],[-0.11918914714956234,51.53215662120039],[-0.1183668990500802,51.53047153972078],[-0.11703208238249248,51.52891861496208],[-0.1152360285207121,51.52755750858678],[-0.11304777111916775,51.52644050785097],[-0.11055139131995274,51.52561051917166],[-0.10784278844706285,51.52509942219323],[-0.105026,51.5249268471588],[-0.10220921155293712,51.52509942219323],[-0.09950060868004722,51.52561051917166],[-0.09700422888083221,51.52644050785097],[-0.09481597147928786,51.52755750858678],[-0.0930199176175075,51.52891861496208],[-0.09168510094991977,51.53047153972078],[-0.09086285285043763,51.53215662120039],[-0.09058482443707525,51.53390911360477],[-0.09086176223707199,51.53566167348195],[-0.09168308575916458,51.5373469471079],[-0.09301728464385584,51.538900159433894],[-0.09481312156908785,51.54026160501795],[-0.0970015959070773,51.54137894496253],[-0.09949859348914601,51.54220922120916],[-0.10220812093946822,51.542720510333936],[-0.105026,51.54289315284119]]]}}});
+    });
 
     describe("get", () => {
       it("user is not logged in", async () => {
@@ -187,16 +215,11 @@ describe("Mobile Tests", () => {
       });
 
       it("user is logged in and passed geo coordinates", async () => {
-        var result = null;
-        // Create a User
-        const userId = ObjectId();
-        await user.create(userId, "peter", "peter", "peter");
-
         // Create mock req/res
         const req = mockRequest({ db: database, body: {
-          longitude: -0.104735, latitude: 51.5350431
+          longitude: -0.12184739112854004, latitude: 51.58095822359073
         }, session: {
-          loggedIn: true, userId: userId
+          loggedIn: true, userId: attendantId
         }, options: {}})
         const res = mockResponse({ send: async function(object) {
           result = object;
@@ -204,8 +227,50 @@ describe("Mobile Tests", () => {
   
         // Execute the indexGet
         await locationPost(req, res)
-        // // Assertions
-        assert.deepEqual({}, result);
+
+        // Grab the attendant doc
+        const attendantDoc = await attendant.findById(attendantId);
+
+        // Assertions
+        assert.deepEqual({
+          type: 'Point', coordinates: [ -0.12184739112854004, 51.58095822359073 ]
+        }, attendantDoc.location);
+      });
+
+      it("user is logged in and part of a crawl", async () => {
+        // Add a pub to the crawl
+        await crawl.addPub(crawlId, pubId);
+        await crawl.addPub(crawlId, secondPubId);
+        // At our current attendant to the crawl
+        await crawl.addAttendant(crawlId, attendantId);
+        // Add the attendant to a specific pub
+        await crawl.addAttendantToPub(crawlId, secondPubId, attendantId);
+
+        // Create mock req/res
+        const req = mockRequest({ db: database, body: {
+          longitude: -0.12184739112854004, latitude: 51.58095822359073
+        }, session: {
+          loggedIn: true, userId: attendantId, crawlId: crawlId
+        }, options: {}})
+        const res = mockResponse({ send: async function(object) {
+          result = object;
+        }});
+  
+        // Execute the indexGet
+        await locationPost(req, res)
+
+        // Grab the attendant doc
+        const attendantDoc = await attendant.findById(attendantId);
+        const crawlDoc = await crawl.findById(crawlId);
+
+        // console.dir(attendantDoc)
+        // console.dir(crawlDoc)
+
+        // Assertions
+        assert.deepEqual({
+          type: 'Point', coordinates: [ -0.12184739112854004, 51.58095822359073 ]
+        }, attendantDoc.location);
+        assert.deepEqual([attendantId], crawlDoc.attendants_location[pubId.toString()]);
       });
     });
   });
