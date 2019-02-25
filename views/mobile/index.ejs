@@ -9,6 +9,9 @@
   </header>
 
   <body>
+    <% if (Object.keys(errors).length == 1 && errors['error']) { %>
+      <div class="alert alert-warning" role="alert"><%= errors['error'] %></div>
+    <% } %>
     <div class="container">
       <div id="crawls"></div>
     </div>
