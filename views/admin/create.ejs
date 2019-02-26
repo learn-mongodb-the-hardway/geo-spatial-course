@@ -13,23 +13,30 @@
   <main role="main" class="container">
     <section class="jumbotron text-left">
       <div class="container">
-        <form action="<%= url('create') %>" method="post">
-          <% if (errors['user']) { %><p><%= errors['user'] %></p><% } %>
-
+        <% if (Object.keys(errors).length == 1 && errors['error']) { %>
+          <div class="alert alert-warning" id="error" role="alert"><%= errors['error'] %></div>
+        <% } %>
+        <form action="<%= url('create') %>" method="post" class="needs-validation" novalidate>
           <div class="form-group">
-            <label>Username:</label>
-            <input type="text" name="username" value="<%= values['username'] %>" class="form-control"/>
-            <% if (errors['username']) { %><p><%= errors['username'] %></p><% } %>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="<%= values['username'] %>" class="form-control <%= errors['username'] ? ' is-invalid' : '' %>" required/>
+            <div class="invalid-feedback">
+              Username must be filled out.
+            </div>
           </div>
           <div class="form-group">
-            <label>Password:</label>
-            <input type="password" name="password" value="<%= values['password'] %>" class="form-control"/>
-            <% if (errors['password']) { %><p><%= errors['password'] %></p><% } %>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" value="<%= values['password'] %>" class="form-control <%= errors['password'] ? ' is-invalid' : '' %>" required/>
+            <div class="invalid-feedback">
+              Password must be filled out.
+            </div>
           </div>
           <div class="form-group">
-            <label>Confirm Password:</label>
-            <input type="password" name="confirm_password" value="<%= values['confirm_password'] %>" class="form-control"/>
-            <% if (errors['confirm_password']) { %><p><%= errors['confirm_password'] %></p><% } %>
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" value="<%= values['confirm_password'] %>" class="form-control <%= errors['confirm_password'] ? ' is-invalid' : '' %>" required/>
+            <div class="invalid-feedback">
+              Confirm password must be filled out.
+            </div>
           </div>
           <div>
             <input type="submit" value="Create" class="btn btn-primary"/>
@@ -39,6 +46,27 @@
     </section>
   </main>
 </body>
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
+</script>
 
 <footer>
   <% include ../partials/footer	 %>
