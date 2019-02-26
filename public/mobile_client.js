@@ -1,15 +1,3 @@
-// /**
-//  * Global variables
-//  */
-// var geoOptions = {
-//   // Max wait time in ms before timing out the location request
-//   timeout: 10000,
-//   // The maximum age of cached geo location data in ms
-//   maximumAge: 5 * 60 * 1000,
-//   // Enable high accuracy mode
-//   enableHighAccuracy: false
-// }
-
 var PubCrawlClient = function(options) {
   this.mymap = null;
   this.currentLocation = null;
@@ -24,7 +12,7 @@ var PubCrawlClient = function(options) {
 PubCrawlClient.prototype.setup = function(callback) {
   var self = this;
 
-  getGeoLocation((err, location) => {
+  getGeoLocation(function(err, location) {
     if (err) {
       return alert(err);
     }
@@ -81,7 +69,7 @@ PubCrawlClient.prototype.setup = function(callback) {
 
 function updateLocation(self) {
   return function() {
-    getGeoLocation((err, location) => {
+    getGeoLocation(function(err, location) {
       if (err) return;
       // Skip everything if the location is the same
       if (location.latitude == self.currentLocation[0]

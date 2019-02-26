@@ -1,81 +1,112 @@
-function setup(options) {
-  var coordinates = [51.505, -0.09];
-
-  if (options.location && options.location.center) {
-    coordinates = [options.location.center[1], options.location.center[0]];  
-  }
-
-  // Create the mapbox view
-  var mymap = L.map(options.mapDivId).setView(coordinates, 18);
-  // Set up the map
-  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + options.accessToken, {
-    maxZoom: 18,
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    id: 'mapbox.streets'
-  }).addTo(mymap);
-
-  // Render any of search result pubs
-  options.searchPubs.forEach(function(pub) {
-    var layer = L.geoJSON(pub.geometry)
-    layer.bindTooltip(pub.name);
-    layer.on('click', function() { 
-      addPub(options, pub);
-    });
-    layer.addTo(mymap);
-  });
-
-  // Location is defined, draw on the map
-  if (options.location && options.location.center) {
-    // Add starting point shape
-    var layer = L.geoJSON(options.location.geometry);
-    layer.bindTooltip(options.location.placeName);
-    layer.addTo(mymap);
-
-    // Create circle
-    var circle = L.circle([options.location.center[1], options.location.center[0]], {
-      color: 'red',
-      fillColor: '#f03',
-      fillOpacity: 0.5,
-      radius: options.locationDistance
-    }).addTo(mymap);
-  }
-
-  // Render any pubs in the walk
-  options.pubs.forEach(function(pub, index) {
-    var markerOptions = {
-      radius: 12, fillColor: "green", color: "#000",
-      weight: 1, opacity: 1, fillOpacity: 0.8      
-    }
-
-    L.geoJSON(pub.geometry, {
-      pointToLayer: function(feature, latlng) {
-        return L.circleMarker(latlng, markerOptions);
-      },
-      onEachFeature: function(feature, layer) {
-        layer.bindTooltip("" + index + ". " + pub.name);
-      }
-    }).addTo(mymap);
-  });
+var AdminClient = function(options) {
+  this.mymap = null;
+  this.currentLocation = null;
+  this.currentLocationMarker = null;
+  this.intervalId = null;
+  this.options = options;
   
-  // If we have some pubs move to them
-  if (options.searchPubs.length) {
-    // Get the first element
-    if (options.searchPubs[0].geometry.type == "Point") {
-      var coordinates = [
-        options.searchPubs[0].geometry.coordinates[1], 
-        options.searchPubs[0].geometry.coordinates[0]];  
-    } else {
-      var coordinates = [
-        options.searchPubs[0].geometry.coordinates[0][0][1], 
-        options.searchPubs[0].geometry.coordinates[0][0][0]];
+  // current look up pub index
+  this.nextPubIndex = 0;
+}
+
+AdminClient.prototype.setup = function() {
+  var self = this;
+
+  getGeoLocation(function(err, location) {
+    if (err) {
+      return alert(err);
     }
 
-    mymap.flyTo(
-      L.latLng(coordinates), 
-      mymap.getZoom());
-  }
+    // Unpack options
+    var optionLocation = this.options.location
+    var searchPubs = this.options.searchPubs;
+    var pubs = this.options.pubs;
+    var mapDivId = this.options.mapDivId;
+    var accessToken = this.options.accessToken;
+    var locationDistance = this.options.locationDistance;
+
+    // Save the current location
+    this.currentLocation = [location.latitude, location.longitude];
+
+    // Override the location
+    if (optionLocation && optionLocation.center) {
+      this.currentLocation = [optionLocation.center[1], optionLocation.center[0]];  
+    }
+
+    // Create the mapbox view
+    this.mymap = L.map(mapDivId).setView(this.currentLocation, 18);
+
+    // Set up the map
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + accessToken, {
+      maxZoom: 18,
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      id: 'mapbox.streets'
+    }).addTo(this.mymap);
+
+    // Render any of search result pubs
+    searchPubs.forEach(function(pub) {
+      var layer = L.geoJSON(pub.geometry)
+      layer.bindTooltip(pub.name);
+      layer.on('click', function() { 
+        addPub(this.options, pub);
+      });
+
+      layer.addTo(this.mymap);
+    });
+
+    // Location is defined, draw on the map
+    if (optionLocation && optionLocation.center) {
+      // Add starting point shape
+      var layer = L.geoJSON(optionLocation.geometry);
+      layer.bindTooltip(optionLocation.placeName);
+      layer.addTo(this.mymap);
+
+      // Create circle
+      var circle = L.circle([optionLocation.center[1], optionLocation.center[0]], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: locationDistance
+      }).addTo(this.mymap);
+    }
+
+    // Render any pubs in the walk
+    pubs.forEach(function(pub, index) {
+      var markerOptions = {
+        radius: 12, fillColor: "green", color: "#000",
+        weight: 1, opacity: 1, fillOpacity: 0.8      
+      }
+
+      L.geoJSON(pub.geometry, {
+        pointToLayer: function(feature, latlng) {
+          return L.circleMarker(latlng, markerOptions);
+        },
+        onEachFeature: function(feature, layer) {
+          layer.bindTooltip("" + index + ". " + pub.name);
+        }
+      }).addTo(this.mymap);
+    });
+    
+    // If we have some pubs move to them
+    if (searchPubs.length) {
+      // Get the first element
+      if (searchPubs[0].geometry.type == "Point") {
+        var coordinates = [
+          searchPubs[0].geometry.coordinates[1], 
+          searchPubs[0].geometry.coordinates[0]];  
+      } else {
+        var coordinates = [
+          searchPubs[0].geometry.coordinates[0][0][1], 
+          searchPubs[0].geometry.coordinates[0][0][0]];
+      }
+
+      this.mymap.flyTo(
+        L.latLng(coordinates), 
+        this.mymap.getZoom());
+    }
+  });
 }
 
 function addPub(options, pub) {
@@ -90,3 +121,82 @@ function addPub(options, pub) {
     setDiv("pubs", result);
   });
 }
+// function setup(options) {
+//   var coordinates = [51.505, -0.09];
+
+//   if (options.location && options.location.center) {
+//     coordinates = [options.location.center[1], options.location.center[0]];  
+//   }
+
+//   // Create the mapbox view
+//   var mymap = L.map(options.mapDivId).setView(coordinates, 18);
+//   // Set up the map
+//   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + options.accessToken, {
+//     maxZoom: 18,
+//     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+//       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+//       'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+//     id: 'mapbox.streets'
+//   }).addTo(mymap);
+
+//   // Render any of search result pubs
+//   options.searchPubs.forEach(function(pub) {
+//     var layer = L.geoJSON(pub.geometry)
+//     layer.bindTooltip(pub.name);
+//     layer.on('click', function() { 
+//       addPub(options, pub);
+//     });
+//     layer.addTo(mymap);
+//   });
+
+//   // Location is defined, draw on the map
+//   if (options.location && options.location.center) {
+//     // Add starting point shape
+//     var layer = L.geoJSON(options.location.geometry);
+//     layer.bindTooltip(options.location.placeName);
+//     layer.addTo(mymap);
+
+//     // Create circle
+//     var circle = L.circle([options.location.center[1], options.location.center[0]], {
+//       color: 'red',
+//       fillColor: '#f03',
+//       fillOpacity: 0.5,
+//       radius: options.locationDistance
+//     }).addTo(mymap);
+//   }
+
+//   // Render any pubs in the walk
+//   options.pubs.forEach(function(pub, index) {
+//     var markerOptions = {
+//       radius: 12, fillColor: "green", color: "#000",
+//       weight: 1, opacity: 1, fillOpacity: 0.8      
+//     }
+
+//     L.geoJSON(pub.geometry, {
+//       pointToLayer: function(feature, latlng) {
+//         return L.circleMarker(latlng, markerOptions);
+//       },
+//       onEachFeature: function(feature, layer) {
+//         layer.bindTooltip("" + index + ". " + pub.name);
+//       }
+//     }).addTo(mymap);
+//   });
+  
+//   // If we have some pubs move to them
+//   if (options.searchPubs.length) {
+//     // Get the first element
+//     if (options.searchPubs[0].geometry.type == "Point") {
+//       var coordinates = [
+//         options.searchPubs[0].geometry.coordinates[1], 
+//         options.searchPubs[0].geometry.coordinates[0]];  
+//     } else {
+//       var coordinates = [
+//         options.searchPubs[0].geometry.coordinates[0][0][1], 
+//         options.searchPubs[0].geometry.coordinates[0][0][0]];
+//     }
+
+//     mymap.flyTo(
+//       L.latLng(coordinates), 
+//       mymap.getZoom());
+//   }
+// }
