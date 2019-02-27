@@ -20,24 +20,41 @@
 
           <hr/>
 
+          <% if (Object.keys(errors).length == 1 && errors['error']) { %>
+            <div class="alert alert-warning" id="error" role="alert"><%= errors['error'] %></div>
+          <% } %>
           <% if (crawl._id == null) { %>
-          <form action="<%= url('crawls/create') %>" method="post">   
+          <form action="<%= url('crawls/create') %>" method="post" class="needs-validation" novalidate>   
           <% } else { %>
-          <form action="<%= url(`crawls/update/${crawl._id}`) %>" method="post">   
+          <form action="<%= url(`crawls/update/${crawl._id}`) %>" method="post" class="needs-validation" novalidate>
           <% } %>
             <div class="form-group">
               <label>Name</label>
-              <input type="text" name="name" class="form-control" value="<%= crawl['name'] %>" placeholder="Pub crawl name"/><br/>
+              <input type="text" id="name" name="name" class="form-control <%= errors['name'] ? ' is-invalid' : '' %>" value="<%= crawl['name'] %>" placeholder="Pub crawl name"/><br/>
+              <div class="invalid-feedback">
+                Name must be filled out.
+              </div>
+            </div>
+            <div class="form-group">
               <label>Description</label>
-              <textarea name="description" class="form-control" placeholder="Pub crawl description"><%= crawl['description'] %></textarea>
+              <textarea id="description" name="description" class="form-control <%= errors['description'] ? ' is-invalid' : '' %>" placeholder="Pub crawl description"><%= crawl['description'] %></textarea>
+              <div class="invalid-feedback">
+                Description must be filled out.
+              </div>
             </div>
             <div class="form-group">
               <label>Start Date</label>
-              <input id="fromdate" name="fromdate" width="276" value="<%= crawl['from'] ? moment(crawl['from']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
+              <input id="fromdate" name="fromdate" width="276" class="form-control <%= errors['fromdate'] ? ' is-invalid' : '' %>" value="<%= crawl['from'] ? moment(crawl['from']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
+              <div class="invalid-feedback">
+                A from date must be set.
+              </div>
             </div>
             <div class="form-group">
               <label>End Date</label>
-              <input id="todate" name="todate" width="276" value="<%= crawl['to'] ? moment(crawl['to']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
+              <input id="todate" name="todate" width="276" class="form-control <%= errors['todate'] ? ' is-invalid' : '' %>" value="<%= crawl['to'] ? moment(crawl['to']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
+              <div class="invalid-feedback">
+                A to date must be set.
+              </div>
             </div>
             <% if (crawl.location != null) { %>
             <div class="form-group">
