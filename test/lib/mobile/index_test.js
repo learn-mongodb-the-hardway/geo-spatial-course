@@ -298,6 +298,7 @@ describe("Mobile Tests", () => {
     describe("get", () => {
       it("user is logged in and leaves", async () => {
         var result = null;
+        var logoutCalled = false;
         // Add a pub to the crawl
         await crawl.addPub(crawlId, pubId);
         await crawl.addPub(crawlId, secondPubId);
@@ -309,7 +310,7 @@ describe("Mobile Tests", () => {
         // Create mock req/res
         const req = mockRequest({ db: database, baseUrl: '/', session: {
           loggedIn: true, userId: attendantId, crawlId: crawlId
-        }, options: {}})
+        }, options: {}, logout: () => { logoutCalled = true }})
 
         const res = mockResponse({ redirect: async function(link) {
           result = link;
@@ -322,6 +323,7 @@ describe("Mobile Tests", () => {
         const crawlDoc = await crawl.findById(crawlId);
 
         // Assertions
+        assert(logoutCalled);
         assert.equal('/', result);
         assert.deepEqual([], crawlDoc.attendants);
         assert.deepEqual([], crawlDoc.attendants_location[secondPubId.toString()]);
