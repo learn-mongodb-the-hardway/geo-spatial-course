@@ -188,18 +188,5 @@ describe("/crawls/create Routes", () => {
         assert.equal(true, doc.window.document.querySelector("#todate").classList.contains('is-invalid'));
       });
     });
-
-    // it('fail due missing crawlId', async () => {
-    //   const crawlId = ObjectId();
-    //   // Prepare the mock request
-    //   const req = mockRequest({ db: database, params: {
-    //   }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
-    //   const res = mockResponse({ redirect: async function(url) {
-    //     assert(url.indexOf('/error?error=') != -1);
-    //   }});
-
-    //   // Execute the indexGet
-    //   await createCrawlIdGet(req, res)
-    // });
   });
 });
