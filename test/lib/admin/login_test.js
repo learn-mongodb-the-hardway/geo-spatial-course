@@ -42,7 +42,7 @@ describe("Admin /login Route", () => {
     it('render /login', async () => {
       var doc = null;
       // Prepare the mock request
-      const req = mockRequest({ db: database, body: {}, session: {}, options: {}, baseUrl: '/admin'})
+      const req = mockRequest({ db: database, body: {}, session: {}, options: {}, baseUrl: '/admin', flash: () => {}})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
         doc = new JSDOM(result);

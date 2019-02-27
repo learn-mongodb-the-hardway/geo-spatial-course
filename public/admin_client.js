@@ -11,7 +11,22 @@ var AdminClient = function(options) {
 
 AdminClient.prototype.setup = function() {
   var self = this;
+  var mapDivId = self.options.mapDivId;
+  var accessToken = self.options.accessToken;
 
+  // Create the mapbox view
+  self.mymap = L.map(mapDivId).setView([51.503605, -0.106506], 1);
+
+  // Set up the map
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + accessToken, {
+    maxZoom: 18,
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    id: 'mapbox.streets'
+  }).addTo(self.mymap);
+
+  // Get the current location
   getGeoLocation(function(err, location) {
     if (err) {
       return alert(err);
@@ -21,8 +36,6 @@ AdminClient.prototype.setup = function() {
     var optionLocation = self.options.location
     var searchPubs = self.options.searchPubs;
     var pubs = self.options.pubs;
-    var mapDivId = self.options.mapDivId;
-    var accessToken = self.options.accessToken;
     var locationDistance = self.options.locationDistance;
 
     // Save the current location
@@ -33,17 +46,8 @@ AdminClient.prototype.setup = function() {
       self.currentLocation = [optionLocation.center[1], optionLocation.center[0]];  
     }
 
-    // Create the mapbox view
-    self.mymap = L.map(mapDivId).setView(self.currentLocation, 18);
-
-    // Set up the map
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + accessToken, {
-      maxZoom: 18,
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-      id: 'mapbox.streets'
-    }).addTo(self.mymap);
+    // Center the map on the location
+    self.mymap.setView(self.currentLocation, 16)
 
     // Render any of search result pubs
     searchPubs.forEach(function(pub) {

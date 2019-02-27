@@ -28,12 +28,8 @@ app.options('*', cors());
 app.set('view engine', 'ejs')
 app.use('/static', express.static('public'))
 
-app.use(require('cookie-parser')());
-app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('body-parser').json());
-app.use(require('express-session')({ secret: secret, resave: false, saveUninitialized: false }));
-
 // Set up basics
+app.use(require('connect-flash')());
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('body-parser').json());
@@ -59,23 +55,21 @@ store.on('error', error => {
   console.err(error);
 });
 
+async function executeAndSkipException(func) {
+  try {
+    await func();
+  } catch (err) {}
+}
+
 // Connect to the database
 client.connect(async (err, client) => {
   if (err) throw err;
 
   // Ensure geo indexes
-  try {
-    await client.db(databaseName).collection('pubs').createIndex({ geometry: "2dsphere" });
-  } catch (err) {}
-  try {
-    await client.db(databaseName).collection('postcodes').createIndex({ geometry: "2dsphere" });
-  } catch (err) {}
-  try {
-    await client.db(databaseName).collection('crawls').createIndex({ "location.geometry": "2dsphere" });
-  } catch (err) {}
-  try {
-    await client.db(databaseName).collection('crawls').createIndex({ "location.polygon": "2dsphere" });
-  } catch (err) {}
+  executeAndSkipException(client.db(databaseName).collection('pubs').createIndex({ geometry: "2dsphere" }));
+  executeAndSkipException(client.db(databaseName).collection('postcodes').createIndex({ geometry: "2dsphere" }));
+  executeAndSkipException(client.db(databaseName).collection('crawls').createIndex({ "location.geometry": "2dsphere" }));
+  executeAndSkipException(client.db(databaseName).collection('crawls').createIndex({ "location.polygon": "2dsphere" }));
 
   // Global options
   const globalOptions = {
