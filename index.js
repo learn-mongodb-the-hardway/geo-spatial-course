@@ -1,9 +1,12 @@
 const express = require('express');
 const { readFileSync } = require('fs');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const passport = require('passport');
+const { Strategy } = require('passport-local');
+const crypto = require('crypto');
 
 // Startup variables
 const accessToken = readFileSync('./token.txt', 'utf8'); // Access token for map-box
@@ -24,6 +27,11 @@ app.use(cors());
 app.options('*', cors());
 app.set('view engine', 'ejs')
 app.use('/static', express.static('public'))
+
+app.use(require('cookie-parser')());
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('body-parser').json());
+app.use(require('express-session')({ secret: secret, resave: false, saveUninitialized: false }));
 
 // Set up basics
 app.use(require('cookie-parser')());
@@ -76,6 +84,59 @@ client.connect(async (err, client) => {
     secret: secret
   }
 
+  // Get the user collection
+  const users = client.db(databaseName).collection('users');
+
+  // Configure the local strategy for use by Passport.
+  //
+  // The local strategy require a `verify` function which receives the credentials
+  // (`username` and `password`) submitted by the user.  The function must verify
+  // that the password is correct and then invoke `cb` with a user object, which
+  // will be set at `req.user` in route handlers after authentication.
+  passport.use(new Strategy(
+    (username, password, cb) => {
+      users.findOne({
+        username: username
+      }, (err, user) => {
+        if (err) { return cb(err); }
+        if (!user) { return cb(null, false); }
+
+        // Hash the password
+        const hash = crypto.createHash('sha256');
+        hash.write(password);
+        const hashedPassword = hash.digest('hex');
+
+        // Check if the hashed password is the same
+        if (user.password != hashedPassword) { return cb(null, false); }
+        return cb(null, user);
+      });
+    }));
+
+  // Configure Passport authenticated session persistence.
+  //
+  // In order to restore authentication state across HTTP requests, Passport needs
+  // to serialize users into and deserialize users out of the session.  The
+  // typical implementation of this is as simple as supplying the user ID when
+  // serializing, and querying the user record by ID from the database when
+  // deserializing.
+  passport.serializeUser((user, cb) => {
+    cb(null, user._id);
+  });
+
+  passport.deserializeUser((id, cb) => {
+    users.findOne({
+      _id: ObjectId(id)
+    }, (err, user) => {
+      if (err) { return cb(err); }
+      cb(null, user);
+    });
+  });
+
+  // Initialize Passport and restore authentication state, if any, from the
+  // session.
+  app.use(passport.initialize());
+  app.use(passport.session());
+
   // Add the additional fields to the request
   app.use((req, res, next) => {
     req.db = client.db(databaseName);
@@ -88,7 +149,7 @@ client.connect(async (err, client) => {
 
   //
   // Add module Routers
-  app.use('/mobile', mobile);
+  app.use('/mobile', mobile(globalOptions));
   app.use('/admin', admin(globalOptions));
 
   //

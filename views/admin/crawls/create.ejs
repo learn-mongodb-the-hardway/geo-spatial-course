@@ -149,7 +149,7 @@
       </script>
     <% if (crawl._id != null) { %>
       <script>
-        new AdminClient().setup({
+        new AdminClient({
           accessToken: '<%= options.accessToken %>',
           mapDivId: 'mapid',
           id: '<%= crawl._id %>',
@@ -158,7 +158,7 @@
           searchPubs: <%- JSON.stringify(pubs) %>,
           location: <%- JSON.stringify(crawl.location || {}) %>,
           locationDistance: <%- crawl.locationDistance || 1000 %>
-        });
+        }).setup();
       </script>
     <% } %>
   </footer>

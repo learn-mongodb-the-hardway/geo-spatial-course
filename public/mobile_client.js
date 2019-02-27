@@ -18,29 +18,29 @@ PubCrawlClient.prototype.setup = function(callback) {
     }
 
     // Unpack fields
-    this.pubs = this.options.pubCrawl && this.options.pubCrawl.pubs
-      ? this.options.pubCrawl.pubs
+    self.pubs = self.options.pubCrawl && self.options.pubCrawl.pubs
+      ? self.options.pubCrawl.pubs
       : [];
 
     // Save the current location
-    this.currentLocation = [location.latitude, location.longitude];
+    self.currentLocation = [location.latitude, location.longitude];
     // Create the mapbox view
-    this.mymap = L.map(this.options.mapDivId).setView(this.currentLocation, 18);
+    self.mymap = L.map(self.options.mapDivId).setView(self.currentLocation, 18);
     // Set up the map
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + this.options.accessToken, {
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + self.options.accessToken, {
       maxZoom: 18,
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
         '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
         'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       id: 'mapbox.streets'
-    }).addTo(this.mymap);
+    }).addTo(self.mymap);
 
     // Create the current marker
-    this.currentLocationMarker = L.marker(this.currentLocation);
-    this.currentLocationMarker.addTo(this.mymap);
+    self.currentLocationMarker = L.marker(self.currentLocation);
+    self.currentLocationMarker.addTo(self.mymap);
 
     // Render all the pub crawl pubs
-    this.pubs.forEach(function(pub, index) {
+    self.pubs.forEach(function(pub, index) {
       var markerOptions = {
         radius: 12, fillColor: "green", color: "#000",
         weight: 1, opacity: 1, fillOpacity: 0.8      
@@ -57,13 +57,13 @@ PubCrawlClient.prototype.setup = function(callback) {
     });
 
     // Invalidate size
-    this.invalidateSize();
+    self.invalidateSize();
 
     // Update the attendant lcoation
     updateAttendantLocation(self.currentLocation);
 
     // Start current location update
-    this.intervalId = setInterval(updateLocation(this), 1000);
+    self.intervalId = setInterval(updateLocation(self), 1000);
   });
 }
 
@@ -128,7 +128,7 @@ function extractPubPoint(pub) {
 
 PubCrawlClient.prototype.center = function() {
   if (this.currentLocation) {
-    // Upate the marker with the current location
+    // Update the marker with the current location
     this.currentLocationMarker.setLatLng(this.currentLocation);    
     // Center the map on the current location marker
     this.mymap.setView(this.currentLocationMarker.getLatLng(),this.mymap.getZoom()); 

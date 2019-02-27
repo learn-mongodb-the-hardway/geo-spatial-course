@@ -87,7 +87,7 @@ describe("Admin /create Route", () => {
       var doc = null;
       // Prepare the mock request
       const req = mockRequest({ db: database, body: {
-        username: 'petrus', password: 'pass', confirm_password: 'pass2' 
+        name: 'petrus', username: 'petrus', password: 'pass', confirm_password: 'pass2' 
       }, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
@@ -111,7 +111,7 @@ describe("Admin /create Route", () => {
     it('successfully create a new user', async () => {
       // Prepare the mock request
       const req = mockRequest({ db: database, body: {
-        username: 'petrus', password: 'pass', confirm_password: 'pass' 
+        name: 'petrus', username: 'petrus', password: 'pass', confirm_password: 'pass' 
       }, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
         // Do assertions
@@ -124,6 +124,7 @@ describe("Admin /create Route", () => {
 
       // Do assertions
       const doc = await user.findByUsername('petrus');
+      assert.equal('petrus', doc.name);
       assert.equal('petrus', doc.username);
       assert(doc.password);
       assert(doc.createdOn);

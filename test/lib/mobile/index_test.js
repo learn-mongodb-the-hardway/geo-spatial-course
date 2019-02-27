@@ -6,7 +6,6 @@ const { mockRequest, mockResponse } = require('mock-req-res')
 const { Crawl } = require('../../../lib/models/crawl');
 const { Pub } = require('../../../lib/models/pub');
 const { User } = require('../../../lib/models/user');
-const { Attendant } = require('../../../lib/models/attendant');
 const { JSDOM } = require("jsdom");
 const { waitOneTick } = require('../utils');
 
@@ -18,7 +17,6 @@ var client = null;
 var database = null;
 var crawl = null;
 var user = null;
-var attendant = null;
 
 // Routes
 const { indexGet, indexPost } = require('../../../lib/mobile/routes/index');
@@ -48,7 +46,6 @@ describe("Mobile Tests", () => {
     crawl = new Crawl(database.collection('crawls'));
     user = new User(database.collection('users'));
     pub = new Pub(database.collection('pubs'));
-    attendant = new Attendant(database.collection('attendants'));
 
     // Create indexes
     await database.collection('crawls').createIndex({ 'location.polygon': "2dsphere" });
@@ -103,8 +100,8 @@ describe("Mobile Tests", () => {
 
         // Prepare the mock request
         const req = mockRequest({ db: database, body: {}, session: {
-          loggedIn: true, crawlId: crawlId
-        }, options: {}})
+          crawlId: crawlId
+        }, options: {}, user: {}})
 
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
@@ -200,7 +197,9 @@ describe("Mobile Tests", () => {
 
     before(async () => {
       // Create an attendant
-      await attendant.create(attendantId, "peter", "peter", "password", "password", {});
+      await user.create(attendantId, "peter", "peter", "password", "password", {
+        role: 'attendant'
+      });
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], 
         {"location":{"polygon":{"type":"Polygon","coordinates":[[[-0.105026,51.54289315284119],[-0.10784387906053175,51.542720510333936],[-0.11055340651085396,51.54220922120916],[-0.11305040409292269,51.54137894496253],[-0.11523887843091213,51.54026160501795],[-0.11703471535614414,51.538900159433894],[-0.1183689142408354,51.5373469471079],[-0.11919023776292799,51.53566167348195],[-0.11946717556292472,51.53390911360477],[-0.11918914714956234,51.53215662120039],[-0.1183668990500802,51.53047153972078],[-0.11703208238249248,51.52891861496208],[-0.1152360285207121,51.52755750858678],[-0.11304777111916775,51.52644050785097],[-0.11055139131995274,51.52561051917166],[-0.10784278844706285,51.52509942219323],[-0.105026,51.5249268471588],[-0.10220921155293712,51.52509942219323],[-0.09950060868004722,51.52561051917166],[-0.09700422888083221,51.52644050785097],[-0.09481597147928786,51.52755750858678],[-0.0930199176175075,51.52891861496208],[-0.09168510094991977,51.53047153972078],[-0.09086285285043763,51.53215662120039],[-0.09058482443707525,51.53390911360477],[-0.09086176223707199,51.53566167348195],[-0.09168308575916458,51.5373469471079],[-0.09301728464385584,51.538900159433894],[-0.09481312156908785,51.54026160501795],[-0.0970015959070773,51.54137894496253],[-0.09949859348914601,51.54220922120916],[-0.10220812093946822,51.542720510333936],[-0.105026,51.54289315284119]]]}}});
@@ -224,8 +223,8 @@ describe("Mobile Tests", () => {
         // Create mock req/res
         const req = mockRequest({ db: database, body: {
           longitude: -0.12184739112854004, latitude: 51.58095822359073
-        }, session: {
-          loggedIn: true, userId: attendantId
+        }, session: {}, user: {
+          _id: attendantId
         }, options: {}})
         const res = mockResponse({ send: async function(object) {
           result = object;
@@ -233,9 +232,10 @@ describe("Mobile Tests", () => {
   
         // Execute the indexGet
         await locationPost(req, res)
+        await waitOneTick();
 
         // Grab the attendant doc
-        const attendantDoc = await attendant.findById(attendantId);
+        const attendantDoc = await user.findById(attendantId);
 
         // Assertions
         assert.deepEqual({
@@ -256,7 +256,9 @@ describe("Mobile Tests", () => {
         const req = mockRequest({ db: database, body: {
           longitude: -0.12184739112854004, latitude: 51.58095822359073
         }, session: {
-          loggedIn: true, userId: attendantId, crawlId: crawlId
+          crawlId: crawlId
+        }, user: {
+          _id: attendantId
         }, options: {}})
 
         const res = mockResponse({ send: async function(object) {
@@ -267,7 +269,7 @@ describe("Mobile Tests", () => {
         await locationPost(req, res)
 
         // Grab the docs
-        const attendantDoc = await attendant.findById(attendantId);
+        const attendantDoc = await user.findById(attendantId);
         const crawlDoc = await crawl.findById(crawlId);
 
         // Assertions
@@ -285,7 +287,9 @@ describe("Mobile Tests", () => {
 
     before(async () => {
       // Create an attendant
-      await attendant.create(attendantId, "peter", "peter", "password", "password", {});
+      await user.create(attendantId, "peter", "peter", "password", "password", {
+        role: 'attendant'
+      });
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], 
         {"location":{"polygon":{"type":"Polygon","coordinates":[[[-0.105026,51.54289315284119],[-0.10784387906053175,51.542720510333936],[-0.11055340651085396,51.54220922120916],[-0.11305040409292269,51.54137894496253],[-0.11523887843091213,51.54026160501795],[-0.11703471535614414,51.538900159433894],[-0.1183689142408354,51.5373469471079],[-0.11919023776292799,51.53566167348195],[-0.11946717556292472,51.53390911360477],[-0.11918914714956234,51.53215662120039],[-0.1183668990500802,51.53047153972078],[-0.11703208238249248,51.52891861496208],[-0.1152360285207121,51.52755750858678],[-0.11304777111916775,51.52644050785097],[-0.11055139131995274,51.52561051917166],[-0.10784278844706285,51.52509942219323],[-0.105026,51.5249268471588],[-0.10220921155293712,51.52509942219323],[-0.09950060868004722,51.52561051917166],[-0.09700422888083221,51.52644050785097],[-0.09481597147928786,51.52755750858678],[-0.0930199176175075,51.52891861496208],[-0.09168510094991977,51.53047153972078],[-0.09086285285043763,51.53215662120039],[-0.09058482443707525,51.53390911360477],[-0.09086176223707199,51.53566167348195],[-0.09168308575916458,51.5373469471079],[-0.09301728464385584,51.538900159433894],[-0.09481312156908785,51.54026160501795],[-0.0970015959070773,51.54137894496253],[-0.09949859348914601,51.54220922120916],[-0.10220812093946822,51.542720510333936],[-0.105026,51.54289315284119]]]}}});
@@ -332,7 +336,9 @@ describe("Mobile Tests", () => {
 
     before(async () => {
       // Create an attendant
-      await attendant.create(attendantId, "peter2", "peter2", "password", "password", {});
+      await user.create(attendantId, "peter2", "peter2", "password", "password", {
+        role: 'attendant'
+      });
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], 
         {"location":{"polygon":{"type":"Polygon","coordinates":[[[-0.105026,51.54289315284119],[-0.10784387906053175,51.542720510333936],[-0.11055340651085396,51.54220922120916],[-0.11305040409292269,51.54137894496253],[-0.11523887843091213,51.54026160501795],[-0.11703471535614414,51.538900159433894],[-0.1183689142408354,51.5373469471079],[-0.11919023776292799,51.53566167348195],[-0.11946717556292472,51.53390911360477],[-0.11918914714956234,51.53215662120039],[-0.1183668990500802,51.53047153972078],[-0.11703208238249248,51.52891861496208],[-0.1152360285207121,51.52755750858678],[-0.11304777111916775,51.52644050785097],[-0.11055139131995274,51.52561051917166],[-0.10784278844706285,51.52509942219323],[-0.105026,51.5249268471588],[-0.10220921155293712,51.52509942219323],[-0.09950060868004722,51.52561051917166],[-0.09700422888083221,51.52644050785097],[-0.09481597147928786,51.52755750858678],[-0.0930199176175075,51.52891861496208],[-0.09168510094991977,51.53047153972078],[-0.09086285285043763,51.53215662120039],[-0.09058482443707525,51.53390911360477],[-0.09086176223707199,51.53566167348195],[-0.09168308575916458,51.5373469471079],[-0.09301728464385584,51.538900159433894],[-0.09481312156908785,51.54026160501795],[-0.0970015959070773,51.54137894496253],[-0.09949859348914601,51.54220922120916],[-0.10220812093946822,51.542720510333936],[-0.105026,51.54289315284119]]]}}});
@@ -387,10 +393,10 @@ describe("Mobile Tests", () => {
 
       it("existing user joining an existing pub crawl", async () => {
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {
-          loggedIn: true, userId: attendantId
-        }, params: {
+        const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
           crawlId: crawlId.toString()
+        }, user: {
+          _id: attendantId
         }, options: {}})
         const res = mockResponse({ redirect: async function(link) {
           result = link;
@@ -458,7 +464,7 @@ describe("Mobile Tests", () => {
         await joinPost(req, res)
 
         // Grab the docs
-        const attendantDoc = await attendant.findByUsername("integration_peter");
+        const attendantDoc = await user.findByUsername("integration_peter");
         const crawlDoc = await crawl.findById(crawlId);
 
         // Assert redirect
@@ -484,74 +490,23 @@ describe("Mobile Tests", () => {
 
     before(async () => {
       // Create an attendant
-      await attendant.create(attendantId, "peter3", "peter3", "password", "password", {});
+      await user.create(attendantId, "peter3", "peter3", "password", "password", {
+        role: 'attendant'
+      });
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], 
         {"location":{"polygon":{"type":"Polygon","coordinates":[[[-0.105026,51.54289315284119],[-0.10784387906053175,51.542720510333936],[-0.11055340651085396,51.54220922120916],[-0.11305040409292269,51.54137894496253],[-0.11523887843091213,51.54026160501795],[-0.11703471535614414,51.538900159433894],[-0.1183689142408354,51.5373469471079],[-0.11919023776292799,51.53566167348195],[-0.11946717556292472,51.53390911360477],[-0.11918914714956234,51.53215662120039],[-0.1183668990500802,51.53047153972078],[-0.11703208238249248,51.52891861496208],[-0.1152360285207121,51.52755750858678],[-0.11304777111916775,51.52644050785097],[-0.11055139131995274,51.52561051917166],[-0.10784278844706285,51.52509942219323],[-0.105026,51.5249268471588],[-0.10220921155293712,51.52509942219323],[-0.09950060868004722,51.52561051917166],[-0.09700422888083221,51.52644050785097],[-0.09481597147928786,51.52755750858678],[-0.0930199176175075,51.52891861496208],[-0.09168510094991977,51.53047153972078],[-0.09086285285043763,51.53215662120039],[-0.09058482443707525,51.53390911360477],[-0.09086176223707199,51.53566167348195],[-0.09168308575916458,51.5373469471079],[-0.09301728464385584,51.538900159433894],[-0.09481312156908785,51.54026160501795],[-0.0970015959070773,51.54137894496253],[-0.09949859348914601,51.54220922120916],[-0.10220812093946822,51.542720510333936],[-0.105026,51.54289315284119]]]}}});
     });
 
     describe("post", () => {
-      it("should fail to login", async () => {
-        var doc = null;
-        // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
-          crawlId: crawlId
-        }, body: {
-
-        }, options: {}})
-
-        const res = mockResponse({ render: async function(template, object = {}) {
-          const result = await ejs.renderFile(`views/${template}`, object);
-          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
-            window.mobileSetup = () => {
-              mobileSetupExecuted = true;
-            }
-          }});
-        }});
-
-        // Execute the action
-        await loginPost(req, res)
-        await waitOneTick();
-
-        // Do assertions
-        assert.equal(true, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
-        assert.equal(true, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
-      });
-
-      it("should fail to login due to wrong password", async () => {
-        var doc = null;
-        // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
-          crawlId: crawlId
-        }, body: {
-          username: "peter3", password: "password2"
-        }, options: {}})
-  
-        const res = mockResponse({ render: async function(template, object = {}) {
-          const result = await ejs.renderFile(`views/${template}`, object);
-          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
-            window.mobileSetup = () => {
-              mobileSetupExecuted = true;
-            }
-          }});
-        }});
-  
-        // Execute the action
-        await loginPost(req, res)
-        await waitOneTick();
-
-        // Do assertions
-        assert(doc.window.document.querySelector("#login_error"));
-      });
-    
-      it("should login successfully", async () => {
+      it("should correctly add the expected fields", async () => {
         var result = null;
         // Create mock req/res
         const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
           crawlId: crawlId
-        }, body: {
-          username: "peter3", password: "password"
-        }, options: {}})
+        }, user: {
+          _id: attendantId
+        }, body: {}, options: {}})
   
         const res = mockResponse({ redirect: async function(link) {
           result = link;

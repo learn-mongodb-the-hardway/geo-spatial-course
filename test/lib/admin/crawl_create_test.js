@@ -19,7 +19,7 @@ var user = null;
 var crawl = null;
 
 // Routes
-const { createGet, createCrawlIdGet, createPost } = require('../../../lib/admin/routes/crawls/create');
+const { createCrawlGet, createCrawlIdGet, createCrawlPost } = require('../../../lib/admin/routes/crawls/create');
 
 if (accessToken == null) {
   accessToken = readFileSync(`${__dirname}/../../../token.txt`, 'utf8');
@@ -59,7 +59,7 @@ describe("/crawls/create Routes", () => {
       }});
 
       // Execute the indexGet
-      await createGet(req, res)
+      await createCrawlGet(req, res)
       await waitOneTick();
 
       // Do assertions
@@ -130,11 +130,10 @@ describe("/crawls/create Routes", () => {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
         doc = new JSDOM(result);
-        // console.log(doc.serialize())
       }});
 
       // Execute the indexGet
-      await createPost(req, res)
+      await createCrawlPost(req, res)
       await waitOneTick();
 
       // Do assertions
@@ -170,11 +169,10 @@ describe("/crawls/create Routes", () => {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
         doc = new JSDOM(result);
-        // console.log(doc.serialize())
       }});
 
       // Execute the indexGet
-      await createPost(req, res)
+      await createCrawlPost(req, res)
       await waitOneTick();
 
       // Do assertions

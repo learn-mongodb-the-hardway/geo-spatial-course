@@ -109,6 +109,7 @@ describe("/crawls/pub Routes", () => {
 
       // Assertions
       assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
+
       assert(doc.serialize().indexOf('/admin/crawls/pub/delete') != -1)
 
       // Locate the crawl
@@ -361,11 +362,11 @@ describe("/crawls/pub Routes", () => {
             }
           }        
 
-          window.AdminClient = function() {
+          window.AdminClient = function(options) {
+            setupOptions = options;
+
             return {
-              setup: function(options) {
-                setupOptions = options;
-              }
+              setup: function() {}
             }
           }
         }});
@@ -424,11 +425,11 @@ describe("/crawls/pub Routes", () => {
             }
           }        
 
-          window.AdminClient = function() {
+          window.AdminClient = function(options) {
+            setupOptions = options;
+
             return {
-              setup: function(options) {
-                setupOptions = options;
-              }
+              setup: function() {}
             }
           }
         }});
@@ -486,11 +487,10 @@ describe("/crawls/pub Routes", () => {
             }
           }        
 
-          window.AdminClient = function() {
+          window.AdminClient = function(options) {
+            setupOptions = options;
             return {
-              setup: function(options) {
-                setupOptions = options;
-              }
+              setup: function() {}
             }
           }
         }});
