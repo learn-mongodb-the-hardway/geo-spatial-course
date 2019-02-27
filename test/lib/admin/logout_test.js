@@ -4,6 +4,7 @@ const ejs = require('ejs');
 const { MongoClient } = require('mongodb');
 const { mockRequest, mockResponse } = require('mock-req-res')
 const { JSDOM } = require("jsdom");
+const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];

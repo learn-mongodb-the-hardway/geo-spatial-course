@@ -6,6 +6,7 @@ const { mockRequest, mockResponse } = require('mock-req-res')
 const { JSDOM } = require("jsdom");
 const { User } = require('../../../lib/models/user');
 const { Crawl } = require('../../../lib/models/crawl');
+const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
@@ -80,19 +81,18 @@ describe("/crawls/location Routes", () => {
 
       // Execute the indexGet
       await locationSetGet(req, res)
+      await waitOneTick();
 
       // Do assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.location)
-        assert(doc.location.center);
-        assert(doc.location.polygon);
-        assert.equal('Polygon', doc.location.polygon.type);
-      });
+      // Assertions
+      assert(doc.location)
+      assert(doc.location.center);
+      assert(doc.location.polygon);
+      assert.equal('Polygon', doc.location.polygon.type);
     });
   });
 
@@ -164,19 +164,18 @@ describe("/crawls/location Routes", () => {
 
       // Execute the indexGet
       await locationFindPost(req, res)
+      await waitOneTick();
 
       // Do assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
-        assert.notEqual(null, doc.window.document.querySelector("#pubSearchTable"));
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert.notEqual(null, doc.window.document.querySelector("#pubSearchTable"));
 
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.searchLocations)
-        assert(doc.searchLocations.length);
-      });
+      // Assertions
+      assert(doc.searchLocations)
+      assert(doc.searchLocations.length);
     });
   });
 });

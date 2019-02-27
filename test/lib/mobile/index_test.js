@@ -8,6 +8,7 @@ const { Pub } = require('../../../lib/models/pub');
 const { User } = require('../../../lib/models/user');
 const { Attendant } = require('../../../lib/models/attendant');
 const { JSDOM } = require("jsdom");
+const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
@@ -86,13 +87,12 @@ describe("Mobile Tests", () => {
 
         // Execute the indexGet
         await indexGet(req, res)
+        await waitOneTick();
 
         // Assertions
-        process.nextTick(async () => {
-          assert.ok(mobileSetupExecuted);
-          assert.notEqual(null, doc.window.document.querySelector("#crawls"));
-          assert.notEqual(null, doc.window.document.querySelector("#mapid"));
-        });        
+        assert.ok(mobileSetupExecuted);
+        assert.notEqual(null, doc.window.document.querySelector("#crawls"));
+        assert.notEqual(null, doc.window.document.querySelector("#mapid"));
       });  
 
       it("should correctly render the / page with a pub crawl in progress", async () => {
@@ -129,11 +129,10 @@ describe("Mobile Tests", () => {
 
         // Execute the indexGet
         await indexGet(req, res)
+        await waitOneTick();
 
-        process.nextTick(async () => {
-          assert.notEqual(null, doc.window.document.querySelector("#mapid"));
-          assert.equal(`/mobile/leave`, doc.window.document.querySelector("nav div a[href]").href)
-        });        
+        assert.notEqual(null, doc.window.document.querySelector("#mapid"));
+        assert.equal(`/mobile/leave`, doc.window.document.querySelector("nav div a[href]").href)
       });
     });  
 
@@ -158,10 +157,9 @@ describe("Mobile Tests", () => {
 
         // Execute the indexGet
         await indexPost(req, res)
+        await waitOneTick();
 
-        process.nextTick(async () => {
-          assert.equal(null, doc.window.document.querySelector("tbody tr"))
-        });        
+        assert.equal(null, doc.window.document.querySelector("tbody tr"))
       });
 
       it("should correctly find a pub crawl", async () => {
@@ -189,10 +187,9 @@ describe("Mobile Tests", () => {
   
         // Execute the indexGet
         await indexPost(req, res)
+        await waitOneTick();
 
-        process.nextTick(async () => {
-          assert.equal(`/mobile/join/${crawlId}`, doc.window.document.querySelector("tbody tr td a[href]").href)
-        });        
+        assert.equal(`/mobile/join/${crawlId}`, doc.window.document.querySelector("tbody tr td a[href]").href)
       });
     });
   });
@@ -378,15 +375,14 @@ describe("Mobile Tests", () => {
   
         // Execute the action
         await joinGet(req, res)
+        await waitOneTick();
 
         // Do assertions
-        process.nextTick(async () => {
-          assert(result.startsWith('/?error='));
-          assert.notEqual(null, doc.window.document.querySelector("input[name='name']"));
-          assert.notEqual(null, doc.window.document.querySelector("input[name='username']"));
-          assert.notEqual(null, doc.window.document.querySelector("input[name='password']"));
-          assert.notEqual(null, doc.window.document.querySelector("input[type='submit']"));
-        });
+        assert(result.startsWith('/?error='));
+        assert.notEqual(null, doc.window.document.querySelector("input[name='name']"));
+        assert.notEqual(null, doc.window.document.querySelector("input[name='username']"));
+        assert.notEqual(null, doc.window.document.querySelector("input[name='password']"));
+        assert.notEqual(null, doc.window.document.querySelector("input[type='submit']"));
       });
 
       it("existing user joining an existing pub crawl", async () => {
@@ -434,13 +430,12 @@ describe("Mobile Tests", () => {
   
         // Execute the action
         await joinPost(req, res)
- 
+        await waitOneTick();
+
         // Do assertions
-        process.nextTick(async () => {
-          assert.equal(true, doc.window.document.querySelector("#join_name").classList.contains('is-invalid'));
-          assert.equal(true, doc.window.document.querySelector("#join_username").classList.contains('is-invalid'));
-          assert.equal(true, doc.window.document.querySelector("#join_password").classList.contains('is-invalid'));
-        });        
+        assert.equal(true, doc.window.document.querySelector("#join_name").classList.contains('is-invalid'));
+        assert.equal(true, doc.window.document.querySelector("#join_username").classList.contains('is-invalid'));
+        assert.equal(true, doc.window.document.querySelector("#join_password").classList.contains('is-invalid'));
      });
 
       it("Posting with all fields present", async () => {
@@ -516,12 +511,11 @@ describe("Mobile Tests", () => {
 
         // Execute the action
         await loginPost(req, res)
+        await waitOneTick();
 
         // Do assertions
-        process.nextTick(async () => {
-          assert.equal(true, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
-          assert.equal(true, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
-        });        
+        assert.equal(true, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
+        assert.equal(true, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
       });
 
       it("should fail to login due to wrong password", async () => {
@@ -544,11 +538,10 @@ describe("Mobile Tests", () => {
   
         // Execute the action
         await loginPost(req, res)
+        await waitOneTick();
 
         // Do assertions
-        process.nextTick(async () => {
-          assert(doc.window.document.querySelector("#login_error"));
-        });        
+        assert(doc.window.document.querySelector("#login_error"));
       });
     
       it("should login successfully", async () => {

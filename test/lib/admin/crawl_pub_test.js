@@ -8,6 +8,7 @@ const { User } = require('../../../lib/models/user');
 const { Pub } = require('../../../lib/models/pub');
 const { Crawl } = require('../../../lib/models/crawl');
 const { PostCode } = require('../../../lib/models/postcode');
+const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
@@ -73,11 +74,10 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubAddPost(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
-      });
+      assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
     });
 
     it('should add pub to crawl', async () => {
@@ -105,22 +105,21 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubAddPost(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
-        assert(doc.serialize().indexOf('/admin/crawls/pub/delete') != -1)
+      assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
+      assert(doc.serialize().indexOf('/admin/crawls/pub/delete') != -1)
 
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.pubs)
-        assert.deepEqual([pubId], doc.pubs);
-      });
+      // Assertions
+      assert(doc.pubs)
+      assert.deepEqual([pubId], doc.pubs);
     });
   });
-
+  
   describe("/crawls/pub/delete", async () => {
     it('should delete pub to crawl', async () => {
       var doc = null;
@@ -147,18 +146,17 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubDeleteGet(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.pubs)
-        assert.deepEqual([], doc.pubs);
-      });
+      // Assertions
+      assert(doc.pubs)
+      assert.deepEqual([], doc.pubs);
     });
 
     it('should not find pub to delete', async () => {
@@ -183,18 +181,17 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubDeleteGet(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.pubs)
-        assert.deepEqual([currentPubId], doc.pubs);
-      });
+      // Assertions
+      assert(doc.pubs)
+      assert.deepEqual([currentPubId], doc.pubs);
     });
   });
 
@@ -228,18 +225,17 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubMoveupGet(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.pubs)
-        assert.deepEqual([secondPubId, pubId], doc.pubs);
-      });
+      // Assertions
+      assert(doc.pubs)
+      assert.deepEqual([secondPubId, pubId], doc.pubs);
     });
 
     it('should not find pub to move up', async () => {
@@ -270,18 +266,17 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubMoveupGet(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.pubs)
-        assert.deepEqual([pubId, secondPubId], doc.pubs);
-      });      
+      // Assertions
+      assert(doc.pubs)
+      assert.deepEqual([pubId, secondPubId], doc.pubs);
     });
 
     it('should not change order due to trying to move first pub up', async () => {
@@ -312,18 +307,17 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubMoveupGet(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
-        // Locate the crawl
-        doc = await crawl.findById(crawlId);
+      // Locate the crawl
+      doc = await crawl.findById(crawlId);
 
-        // Assertions
-        assert(doc.pubs)
-        assert.deepEqual([pubId, secondPubId], doc.pubs);
-      });
+      // Assertions
+      assert(doc.pubs)
+      assert.deepEqual([pubId, secondPubId], doc.pubs);
     });
   });  
 
@@ -379,15 +373,13 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubFindPost(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
-
-        assert(setupOptions);
-        assert(setupOptions.searchPubs);
-        assert(setupOptions.searchPubs.length > 0);  
-      });
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert(setupOptions);
+      assert(setupOptions.searchPubs);
+      assert(setupOptions.searchPubs.length > 0);  
     });
 
     it('should lookup pubs by postcode successfully', async () => {
@@ -444,15 +436,14 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubFindPost(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
-        assert(setupOptions);
-        assert(setupOptions.searchPubs);
-        assert(setupOptions.searchPubs.length > 0);  
-      });
+      assert(setupOptions);
+      assert(setupOptions.searchPubs);
+      assert(setupOptions.searchPubs.length > 0);  
     });
 
     it('should return nothing due to neither address or post code passed', async () => {
@@ -507,14 +498,13 @@ describe("/crawls/pub Routes", () => {
 
       // Execute the indexGet
       await pubFindPost(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
-        assert(setupOptions);
-        assert(setupOptions.searchPubs);
-        assert(setupOptions.searchPubs.length == 0);  
-      });
+      assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+      assert(setupOptions);
+      assert(setupOptions.searchPubs);
+      assert(setupOptions.searchPubs.length == 0);  
     });
   });
 });

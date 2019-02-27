@@ -7,6 +7,7 @@ const { JSDOM } = require("jsdom");
 const { User } = require('../../../lib/models/user');
 const { Crawl } = require('../../../lib/models/crawl');
 const moment = require('moment');
+const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
@@ -59,10 +60,10 @@ describe("/crawls/create Routes", () => {
 
       // Execute the indexGet
       await createGet(req, res)
+      await waitOneTick();
+
       // Do assertions
-      process.nextTick(() => {
-        assert.notEqual(null, doc.window.document.querySelector("#fromdate"));
-      });
+      assert.notEqual(null, doc.window.document.querySelector("#fromdate"));
     });
 
   });
@@ -83,19 +84,17 @@ describe("/crawls/create Routes", () => {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
         doc = new JSDOM(result);
-        // console.log(doc.serialize())
       }});
 
       // Execute the indexGet
       await createCrawlIdGet(req, res)
+      await waitOneTick();
 
       // Do assertions
-      process.nextTick(async () => {
-        assert.equal('Crawl 1', doc.window.document.querySelector("#name").value);
-        assert.equal('Crawl Description', doc.window.document.querySelector("#description").value);
-        assert(doc.window.document.querySelector("#fromdate").value);
-        assert(doc.window.document.querySelector("#todate").value);
-      });
+      assert.equal('Crawl 1', doc.window.document.querySelector("#name").value);
+      assert.equal('Crawl Description', doc.window.document.querySelector("#description").value);
+      assert(doc.window.document.querySelector("#fromdate").value);
+      assert(doc.window.document.querySelector("#todate").value);
     });
 
     it('fail due missing crawlId', async () => {
@@ -136,26 +135,24 @@ describe("/crawls/create Routes", () => {
 
       // Execute the indexGet
       await createPost(req, res)
+      await waitOneTick();
 
       // Do assertions
-      process.nextTick(async () => {
-        // Do assertions
-        assert.equal('My test crawl', doc.window.document.querySelector("#name").value);
-        assert.equal('My test crawl', doc.window.document.querySelector("#description").value);
-        assert(doc.window.document.querySelector("#fromdate").value);
-        assert(doc.window.document.querySelector("#todate").value);
+      assert.equal('My test crawl', doc.window.document.querySelector("#name").value);
+      assert.equal('My test crawl', doc.window.document.querySelector("#description").value);
+      assert(doc.window.document.querySelector("#fromdate").value);
+      assert(doc.window.document.querySelector("#todate").value);
 
-        // Grab the crawl
-        const doc1 = await crawl.findByUsername(username);
-        assert(doc1[0]);
-        assert.equal('My test crawl', doc1[0].name);
-        assert.equal('My test crawl', doc1[0].description);
-        assert.equal(username, doc1[0].username);
-        assert.equal(false, doc1[0].published);
-        assert(doc1[0].from);
-        assert(doc1[0].to);
-        assert(doc1[0].createdOn);
-      });
+      // Grab the crawl
+      const doc1 = await crawl.findByUsername(username);
+      assert(doc1[0]);
+      assert.equal('My test crawl', doc1[0].name);
+      assert.equal('My test crawl', doc1[0].description);
+      assert.equal(username, doc1[0].username);
+      assert.equal(false, doc1[0].published);
+      assert(doc1[0].from);
+      assert(doc1[0].to);
+      assert(doc1[0].createdOn);
     });
 
     it('should fail due to no fields passed in', async () => {
@@ -178,15 +175,13 @@ describe("/crawls/create Routes", () => {
 
       // Execute the indexGet
       await createPost(req, res)
+      await waitOneTick();
 
       // Do assertions
-      process.nextTick(async () => {
-        // Do assertions
-        assert.equal('My test crawl', doc.window.document.querySelector("#name").value);
-        assert.equal(true, doc.window.document.querySelector("#description").classList.contains('is-invalid'));
-        assert.equal(true, doc.window.document.querySelector("#fromdate").classList.contains('is-invalid'));
-        assert.equal(true, doc.window.document.querySelector("#todate").classList.contains('is-invalid'));
-      });
+      assert.equal('My test crawl', doc.window.document.querySelector("#name").value);
+      assert.equal(true, doc.window.document.querySelector("#description").classList.contains('is-invalid'));
+      assert.equal(true, doc.window.document.querySelector("#fromdate").classList.contains('is-invalid'));
+      assert.equal(true, doc.window.document.querySelector("#todate").classList.contains('is-invalid'));
     });
   });
 });

@@ -6,6 +6,7 @@ const { mockRequest, mockResponse } = require('mock-req-res')
 const { JSDOM } = require("jsdom");
 const { User } = require('../../../lib/models/user');
 const { Crawl } = require('../../../lib/models/crawl');
+const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
@@ -63,15 +64,14 @@ describe("/crawls/location Routes", () => {
 
       // Execute the indexGet
       await unpublishGet(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert.equal(1, doc.window.document.querySelectorAll("tbody tr").length);
-        
-        doc = await crawl.findById(crawlId);
-        assert(doc);
-        assert.equal(false, doc.published);  
-      });
+      assert.equal(1, doc.window.document.querySelectorAll("tbody tr").length);
+      
+      doc = await crawl.findById(crawlId);
+      assert(doc);
+      assert.equal(false, doc.published);  
     });
 
     it('missing crawl', async () => {
@@ -89,11 +89,10 @@ describe("/crawls/location Routes", () => {
 
       // Execute the indexGet
       await unpublishGet(req, res)
+      await waitOneTick();
 
       // Assertions
-      process.nextTick(async () => {
-        assert(result.indexOf("/error?error=") != -1);
-      });
+      assert(result.indexOf("/error?error=") != -1);
     });
 
   });

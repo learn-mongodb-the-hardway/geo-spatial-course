@@ -4,6 +4,7 @@ const ejs = require('ejs');
 const { MongoClient } = require('mongodb');
 const { mockRequest, mockResponse } = require('mock-req-res')
 const { JSDOM } = require("jsdom");
+const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
@@ -49,13 +50,12 @@ describe("Admin /login Route", () => {
 
       // Execute the indexGet
       await loginGet(req, res)
+      await waitOneTick();
 
       // Do assertions
-      process.nextTick(async () => {
-        assert.notEqual(null, doc.window.document.querySelector("#username"));
-        assert.notEqual(null, doc.window.document.querySelector("#password"));
-        assert.notEqual(null, doc.window.document.querySelector("#login_submit"));
-      });
+      assert.notEqual(null, doc.window.document.querySelector("#username"));
+      assert.notEqual(null, doc.window.document.querySelector("#password"));
+      assert.notEqual(null, doc.window.document.querySelector("#login_submit"));
     });
   });
 
