@@ -46,6 +46,7 @@ describe("/crawls/create Routes", () => {
   describe("/crawls/create get", async () => {
 
     it('update the current pub crawl starting location ', async () => {
+      var doc = null
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {
         // crawlId: crawlId
@@ -53,16 +54,15 @@ describe("/crawls/create Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#fromdate"));
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await createGet(req, res)
+      // Do assertions
+      process.nextTick(() => {
+        assert.notEqual(null, doc.window.document.querySelector("#fromdate"));
+      });
     });
 
   });
@@ -90,7 +90,7 @@ describe("/crawls/create Routes", () => {
       await createCrawlIdGet(req, res)
 
       // Do assertions
-      process.nextTick(() => {
+      process.nextTick(async () => {
         assert.equal('Crawl 1', doc.window.document.querySelector("#name").value);
         assert.equal('Crawl Description', doc.window.document.querySelector("#description").value);
         assert(doc.window.document.querySelector("#fromdate").value);

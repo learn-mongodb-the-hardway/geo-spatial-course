@@ -54,6 +54,7 @@ describe("/crawls/pub Routes", () => {
   describe("/crawls/pub/add", async () => {
 
     it('should not add pub due to pub not found', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
@@ -67,19 +68,20 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await pubAddPost(req, res)
+
+      // Assertions
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
+      });
     });
 
     it('should add pub to crawl', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
@@ -98,29 +100,30 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
-        assert(result.indexOf('/admin/crawls/pub/delete') != -1)
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await pubAddPost(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
-
       // Assertions
-      assert(doc.pubs)
-      assert.deepEqual([pubId], doc.pubs);
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
+        assert(doc.serialize().indexOf('/admin/crawls/pub/delete') != -1)
+
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
+
+        // Assertions
+        assert(doc.pubs)
+        assert.deepEqual([pubId], doc.pubs);
+      });
     });
   });
 
   describe("/crawls/pub/delete", async () => {
     it('should delete pub to crawl', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Add a fake pub
       const pubId = ObjectId();
@@ -139,26 +142,27 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await pubDeleteGet(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
-
       // Assertions
-      assert(doc.pubs)
-      assert.deepEqual([], doc.pubs);
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
+
+        // Assertions
+        assert(doc.pubs)
+        assert.deepEqual([], doc.pubs);
+      });
     });
 
     it('should not find pub to delete', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       const pubId = ObjectId();
       const currentPubId = ObjectId();
@@ -174,29 +178,30 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await pubDeleteGet(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
-
       // Assertions
-      assert(doc.pubs)
-      assert.deepEqual([currentPubId], doc.pubs);
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
+
+        // Assertions
+        assert(doc.pubs)
+        assert.deepEqual([currentPubId], doc.pubs);
+      });
     });
   });
 
   describe("/crawls/pub/moveup", async () => {
     
     it('should move pub up in the order list', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Add a fake pub
       const pubId = ObjectId();
@@ -218,26 +223,27 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await pubMoveupGet(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
-
       // Assertions
-      assert(doc.pubs)
-      assert.deepEqual([secondPubId, pubId], doc.pubs);
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
+
+        // Assertions
+        assert(doc.pubs)
+        assert.deepEqual([secondPubId, pubId], doc.pubs);
+      });
     });
 
     it('should not find pub to move up', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Add a fake pub
       const pubId = ObjectId();
@@ -259,26 +265,27 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await pubMoveupGet(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
-
       // Assertions
-      assert(doc.pubs)
-      assert.deepEqual([pubId, secondPubId], doc.pubs);
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
+
+        // Assertions
+        assert(doc.pubs)
+        assert.deepEqual([pubId, secondPubId], doc.pubs);
+      });      
     });
 
     it('should not change order due to trying to move first pub up', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Add a fake pub
       const pubId = ObjectId();
@@ -300,29 +307,30 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await pubMoveupGet(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
-
       // Assertions
-      assert(doc.pubs)
-      assert.deepEqual([pubId, secondPubId], doc.pubs);
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
+
+        // Assertions
+        assert(doc.pubs)
+        assert.deepEqual([pubId, secondPubId], doc.pubs);
+      });
     });
   });  
 
   describe("/crawls/pub/find", async () => {
     
     it('should lookup pubs by address successfully', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Add a fake pub
       const pubId = ObjectId();
@@ -351,7 +359,7 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async (template, object) => {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
           window.$ = function() {
             return {
               datetimepicker: function() {},
@@ -367,18 +375,15 @@ describe("/crawls/pub Routes", () => {
             }
           }
         }});
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
       }});
 
       // Execute the indexGet
       await pubFindPost(req, res)
 
       // Assertions
-      process.nextTick(() => {
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+
         assert(setupOptions);
         assert(setupOptions.searchPubs);
         assert(setupOptions.searchPubs.length > 0);  
@@ -386,6 +391,7 @@ describe("/crawls/pub Routes", () => {
     });
 
     it('should lookup pubs by postcode successfully', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Add a fake pub
       const pubId = ObjectId();
@@ -418,7 +424,7 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async (template, object) => {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
           window.$ = function() {
             return {
               datetimepicker: function() {},
@@ -434,18 +440,15 @@ describe("/crawls/pub Routes", () => {
             }
           }
         }});
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
       }});
 
       // Execute the indexGet
       await pubFindPost(req, res)
 
       // Assertions
-      process.nextTick(() => {
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+
         assert(setupOptions);
         assert(setupOptions.searchPubs);
         assert(setupOptions.searchPubs.length > 0);  
@@ -453,6 +456,7 @@ describe("/crawls/pub Routes", () => {
     });
 
     it('should return nothing due to neither address or post code passed', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Add a fake pub
       const pubId = ObjectId();
@@ -483,7 +487,7 @@ describe("/crawls/pub Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async (template, object) => {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
           window.$ = function() {
             return {
               datetimepicker: function() {},
@@ -499,18 +503,14 @@ describe("/crawls/pub Routes", () => {
             }
           }
         }});
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
       }});
 
       // Execute the indexGet
       await pubFindPost(req, res)
 
       // Assertions
-      process.nextTick(() => {
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
         assert(setupOptions);
         assert(setupOptions.searchPubs);
         assert(setupOptions.searchPubs.length == 0);  

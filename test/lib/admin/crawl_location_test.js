@@ -45,6 +45,7 @@ describe("/crawls/location Routes", () => {
   describe("./location/set get", async () => {
 
     it('update the current pub crawl starting location ', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {
@@ -61,7 +62,7 @@ describe("/crawls/location Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
           window.$ = function() {
             return {
               datetimepicker: function() {},
@@ -75,24 +76,23 @@ describe("/crawls/location Routes", () => {
             }
           }
         }});
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
       }});
 
       // Execute the indexGet
       await locationSetGet(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
+      // Do assertions
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
 
-      // Assertions
-      assert(doc.location)
-      assert(doc.location.center);
-      assert(doc.location.polygon);
-      assert.equal('Polygon', doc.location.polygon.type);
+        // Assertions
+        assert(doc.location)
+        assert(doc.location.center);
+        assert(doc.location.polygon);
+        assert.equal('Polygon', doc.location.polygon.type);
+      });
     });
   });
 
@@ -126,6 +126,7 @@ describe("/crawls/location Routes", () => {
     });
 
     it('correctly set search pubs', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {
@@ -145,7 +146,7 @@ describe("/crawls/location Routes", () => {
       }, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
           window.$ = function() {
             return {
               datetimepicker: function() {},
@@ -159,23 +160,23 @@ describe("/crawls/location Routes", () => {
             }
           }
         }});
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
-        assert.notEqual(null, doc.window.document.querySelector("#pubSearchTable"));
       }});
 
       // Execute the indexGet
       await locationFindPost(req, res)
 
-      // Locate the crawl
-      const doc = await crawl.findById(crawlId);
+      // Do assertions
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
+        assert.notEqual(null, doc.window.document.querySelector("#pubSearchTable"));
 
-      // Assertions
-      assert(doc.searchLocations)
-      assert(doc.searchLocations.length);
+        // Locate the crawl
+        doc = await crawl.findById(crawlId);
+
+        // Assertions
+        assert(doc.searchLocations)
+        assert(doc.searchLocations.length);
+      });
     });
   });
 });
