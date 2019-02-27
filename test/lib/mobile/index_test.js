@@ -71,30 +71,32 @@ describe("Mobile Tests", () => {
 
     describe("get", () => {
       it("should correctly render the / page with no pub crawl in progress", async () => {
+        var doc = null;
         var mobileSetupExecuted = false;
         // Prepare the mock request
         const req = mockRequest({ db: database, body: {}, session: {}, options: {}})
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
-          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
           }});
-
-          // Do assertions
-          assert.notEqual(null, doc.window.document.querySelector("#crawls"));
-          assert.notEqual(null, doc.window.document.querySelector("#mapid"));
-          // console.log(doc.serialize())
         }});
 
         // Execute the indexGet
         await indexGet(req, res)
+
         // Assertions
-        assert.ok(mobileSetupExecuted);
+        process.nextTick(async () => {
+          assert.ok(mobileSetupExecuted);
+          assert.notEqual(null, doc.window.document.querySelector("#crawls"));
+          assert.notEqual(null, doc.window.document.querySelector("#mapid"));
+        });        
       });  
 
       it("should correctly render the / page with a pub crawl in progress", async () => {
+        var doc = null;
         const crawlId = ObjectId();
         // Create a new pub crawl
         await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {})
@@ -106,7 +108,7 @@ describe("Mobile Tests", () => {
 
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
-          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
@@ -123,20 +125,21 @@ describe("Mobile Tests", () => {
               }
             }
           }});
-
-          // console.log(doc.serialize())
-          // Do assertions
-          assert.notEqual(null, doc.window.document.querySelector("#mapid"));
-          assert.equal(`/mobile/leave`, doc.window.document.querySelector("nav div a[href]").href)
         }});
 
         // Execute the indexGet
         await indexGet(req, res)
+
+        process.nextTick(async () => {
+          assert.notEqual(null, doc.window.document.querySelector("#mapid"));
+          assert.equal(`/mobile/leave`, doc.window.document.querySelector("nav div a[href]").href)
+        });        
       });
     });  
 
     describe("post", () => {
       it("should correctly a list with no pub crawls", async () => {
+        var doc = null;
         // Create a new pub crawl, with a location
         const crawlId = ObjectId();
         // Create a new pub crawl
@@ -150,18 +153,19 @@ describe("Mobile Tests", () => {
 
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
-          const doc = new JSDOM(result);
-
-          // Do assertions
-          // console.log(doc.serialize())
-          assert.equal(null, doc.window.document.querySelector("tbody tr"))
+          doc = new JSDOM(result);
         }});
 
         // Execute the indexGet
         await indexPost(req, res)
+
+        process.nextTick(async () => {
+          assert.equal(null, doc.window.document.querySelector("tbody tr"))
+        });        
       });
 
       it("should correctly find a pub crawl", async () => {
+        var doc = null;
         // Create a new pub crawl, with a location
         const crawlId = ObjectId();
         // Create a new pub crawl
@@ -176,19 +180,19 @@ describe("Mobile Tests", () => {
   
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
-          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
           }});
-  
-          // Do assertions
-          // console.log(doc.serialize())
-          assert.equal(`/mobile/join/${crawlId}`, doc.window.document.querySelector("tbody tr td a[href]").href)
         }});
   
         // Execute the indexGet
         await indexPost(req, res)
+
+        process.nextTick(async () => {
+          assert.equal(`/mobile/join/${crawlId}`, doc.window.document.querySelector("tbody tr td a[href]").href)
+        });        
       });
     });
   });
@@ -314,11 +318,7 @@ describe("Mobile Tests", () => {
         await leaveGet(req, res)
 
         // Grab docs
-        // const attendantDoc = await attendant.findById(attendantId);
         const crawlDoc = await crawl.findById(crawlId);
-
-        // console.dir(attendantDoc)
-        // console.dir(crawlDoc)
 
         // Assertions
         assert.equal('/', result);
@@ -361,30 +361,32 @@ describe("Mobile Tests", () => {
       });
 
       it("existing user joining non existing pub crawl", async () => {
+        var doc = null;
         // Create mock req/res
         const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
           crawlId: crawlId.toString()
         }, options: {}})
         const res = mockResponse({ render: async function(template, object = {}) {
           const result = await ejs.renderFile(`views/${template}`, object);
-          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
           }});
 
-          // Do assertions
-          assert.notEqual(null, doc.window.document.querySelector("input[name='name']"));
-          assert.notEqual(null, doc.window.document.querySelector("input[name='username']"));
-          assert.notEqual(null, doc.window.document.querySelector("input[name='password']"));
-          assert.notEqual(null, doc.window.document.querySelector("input[type='submit']"));
         }});
   
         // Execute the action
         await joinGet(req, res)
 
-        // Assertions
-        assert(result.startsWith('/?error='));
+        // Do assertions
+        process.nextTick(async () => {
+          assert(result.startsWith('/?error='));
+          assert.notEqual(null, doc.window.document.querySelector("input[name='name']"));
+          assert.notEqual(null, doc.window.document.querySelector("input[name='username']"));
+          assert.notEqual(null, doc.window.document.querySelector("input[name='password']"));
+          assert.notEqual(null, doc.window.document.querySelector("input[type='submit']"));
+        });
       });
 
       it("existing user joining an existing pub crawl", async () => {
@@ -412,6 +414,7 @@ describe("Mobile Tests", () => {
 
     describe("post", () => {
       it("Posting with all fields missing", async () => {
+        var doc = null;
         // Create mock req/res
         const req = mockRequest({ db: database, baseUrl: '/', session: {
           loggedIn: true, userId: attendantId
@@ -422,21 +425,23 @@ describe("Mobile Tests", () => {
 
         const res = mockResponse({ render: async function(template, object = {}) {
           const result = await ejs.renderFile(`views/${template}`, object);
-          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
           }});
-
-          // Do assertions
-          assert.equal(true, doc.window.document.querySelector("#join_name").classList.contains('is-invalid'));
-          assert.equal(true, doc.window.document.querySelector("#join_username").classList.contains('is-invalid'));
-          assert.equal(true, doc.window.document.querySelector("#join_password").classList.contains('is-invalid'));
         }});
   
         // Execute the action
         await joinPost(req, res)
-      });
+ 
+        // Do assertions
+        process.nextTick(async () => {
+          assert.equal(true, doc.window.document.querySelector("#join_name").classList.contains('is-invalid'));
+          assert.equal(true, doc.window.document.querySelector("#join_username").classList.contains('is-invalid'));
+          assert.equal(true, doc.window.document.querySelector("#join_password").classList.contains('is-invalid'));
+        });        
+     });
 
       it("Posting with all fields present", async () => {
         var result = null;
@@ -460,9 +465,6 @@ describe("Mobile Tests", () => {
         // Grab the docs
         const attendantDoc = await attendant.findByUsername("integration_peter");
         const crawlDoc = await crawl.findById(crawlId);
-
-        // console.dir(attendantDoc)
-        // console.dir(crawlDoc)
 
         // Assert redirect
         assert.equal('/', result);
@@ -495,6 +497,7 @@ describe("Mobile Tests", () => {
 
     describe("post", () => {
       it("should fail to login", async () => {
+        var doc = null;
         // Create mock req/res
         const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
           crawlId: crawlId
@@ -504,23 +507,25 @@ describe("Mobile Tests", () => {
 
         const res = mockResponse({ render: async function(template, object = {}) {
           const result = await ejs.renderFile(`views/${template}`, object);
-          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
           }});
-
-          // console.log(doc.serialize())
-          // Do assertions
-          assert.equal(true, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
-          assert.equal(true, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
         }});
 
         // Execute the action
         await loginPost(req, res)
+
+        // Do assertions
+        process.nextTick(async () => {
+          assert.equal(true, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
+          assert.equal(true, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
+        });        
       });
 
       it("should fail to login due to wrong password", async () => {
+        var doc = null;
         // Create mock req/res
         const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
           crawlId: crawlId
@@ -530,19 +535,20 @@ describe("Mobile Tests", () => {
   
         const res = mockResponse({ render: async function(template, object = {}) {
           const result = await ejs.renderFile(`views/${template}`, object);
-          const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
           }});
-  
-          // console.log(doc.serialize())
-          // Do assertions
-          assert(doc.window.document.querySelector("#login_error"));
         }});
   
         // Execute the action
         await loginPost(req, res)
+
+        // Do assertions
+        process.nextTick(async () => {
+          assert(doc.window.document.querySelector("#login_error"));
+        });        
       });
     
       it("should login successfully", async () => {

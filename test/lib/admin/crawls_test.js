@@ -44,6 +44,7 @@ describe("/crawls/location Routes", () => {
   describe("./crawls get", async () => {
 
     it('successfully render pub crawls', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
@@ -55,13 +56,15 @@ describe("/crawls/location Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-        // Do assertions
-        assert.equal(1, doc.window.document.querySelectorAll("tbody tr").length);
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await crawlsGet(req, res)
+
+      process.nextTick(async () => {
+        assert.equal(1, doc.window.document.querySelectorAll("tbody tr").length);
+      });
     });
 
   });

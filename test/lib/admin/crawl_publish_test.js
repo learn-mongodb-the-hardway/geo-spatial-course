@@ -44,6 +44,7 @@ describe("/crawls/location Routes", () => {
   describe("/crawls/publish get", async () => {
 
     it('successfully publish pub crawl', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
@@ -57,12 +58,7 @@ describe("/crawls/location Routes", () => {
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result);
-
-        // console.log(doc.serialize());
-
-        // Do assertions
-        assert.equal(1, doc.window.document.querySelectorAll("tbody tr").length);
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
@@ -70,7 +66,9 @@ describe("/crawls/location Routes", () => {
 
       // Assertions
       process.nextTick(async () => {
-        const doc = await crawl.findById(crawlId);
+        assert.equal(1, doc.window.document.querySelectorAll("tbody tr").length);
+
+        doc = await crawl.findById(crawlId);
         assert(doc);
         assert.equal(true, doc.published);  
       });

@@ -39,25 +39,23 @@ describe("Admin /login Route", () => {
   describe("get", async () => {
 
     it('render /login', async () => {
+      var doc = null;
       // Prepare the mock request
       const req = mockRequest({ db: database, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
-          // window.mobileSetup = () => {
-          //   mobileSetupExecuted = true;
-          // }
-        }});
-
-        // Do assertions
-        assert.notEqual(null, doc.window.document.querySelector("#username"));
-        assert.notEqual(null, doc.window.document.querySelector("#password"));
-        assert.notEqual(null, doc.window.document.querySelector("#login_submit"));
-        // console.log(doc.serialize())
+        doc = new JSDOM(result);
       }});
 
       // Execute the indexGet
       await loginGet(req, res)
+
+      // Do assertions
+      process.nextTick(async () => {
+        assert.notEqual(null, doc.window.document.querySelector("#username"));
+        assert.notEqual(null, doc.window.document.querySelector("#password"));
+        assert.notEqual(null, doc.window.document.querySelector("#login_submit"));
+      });
     });
   });
 

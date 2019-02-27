@@ -62,36 +62,41 @@ describe("Admin /create Route", () => {
   describe("post", async () => {
 
     it('all fields are null', async () => {
+      var doc = null;
       // Prepare the mock request
       const req = mockRequest({ db: database, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
-
-        // console.log(doc.serialize())
-
-        // Do assertions
-        assert.equal(true, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
-        assert.equal(true, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
-        assert.equal(true, doc.window.document.querySelector("#confirm_password").classList.contains('is-invalid'));
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
       }});
 
       // Execute the indexGet
       await createPost(req, res)
+
+      // Do assertions
+      process.nextTick(async () => {
+        assert.equal(true, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
+        assert.equal(true, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
+        assert.equal(true, doc.window.document.querySelector("#confirm_password").classList.contains('is-invalid'));
+      });
     });
 
     it('password and confirm_password not equal', async () => {
+      var doc = null;
       // Prepare the mock request
       const req = mockRequest({ db: database, body: {
         username: 'petrus', password: 'pass', confirm_password: 'pass2' 
       }, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        const doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
+      }});
 
-        // console.log(doc.serialize())
+      // Execute the indexGet
+      await createPost(req, res)
 
-        // Do assertions
+      // Do assertions
+      process.nextTick(async () => {
         assert(doc.window.document.querySelector("#error").innerHTML == "password and confirm password must be equal");
         assert.equal(false, doc.window.document.querySelector("#username").classList.contains('is-invalid'));
         assert.equal(false, doc.window.document.querySelector("#password").classList.contains('is-invalid'));
@@ -99,10 +104,7 @@ describe("Admin /create Route", () => {
         assert.equal('petrus', doc.window.document.querySelector("#username").value);
         assert.equal('pass', doc.window.document.querySelector("#password").value);
         assert.equal('pass2', doc.window.document.querySelector("#confirm_password").value);
-      }});
-
-      // Execute the indexGet
-      await createPost(req, res)
+      });
     });
 
     it('successfully create a new user', async () => {
@@ -118,11 +120,13 @@ describe("Admin /create Route", () => {
       // Execute the indexGet
       await createPost(req, res)
 
-      // Assert the user got created
-      const doc = await user.findByUsername('petrus');
-      assert.equal('petrus', doc.username);
-      assert(doc.password);
-      assert(doc.createdOn);
+      // Do assertions
+      process.nextTick(async () => {
+        const doc = await user.findByUsername('petrus');
+        assert.equal('petrus', doc.username);
+        assert(doc.password);
+        assert(doc.createdOn);
+      });
     });
   });
 });
