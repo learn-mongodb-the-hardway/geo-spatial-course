@@ -27,3 +27,6 @@ jobs:
           prefix: tests
       - store_test_results:
           path: test-results.xml
+      - deploy:
+          name: digital-ocean
+          command: ssh -o "StrictHostKeyChecking no" pubcrawl@134.209.65.161 "cd ~/geo-spatial-course; git pull; npm install; npm restart"
