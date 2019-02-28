@@ -143,8 +143,8 @@ client.connect(async (err, client) => {
 
   //
   // Add module Routers
-  app.use('/mobile', mobile(globalOptions));
-  app.use('/admin', admin(globalOptions));
+  app.use('/mobile', mobile);
+  app.use('/admin', admin);
 
   //
   // Routes

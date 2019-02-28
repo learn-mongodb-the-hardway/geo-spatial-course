@@ -3,142 +3,22 @@
   <head>
       <% include ../../partials/admin/head %>
   </head>
+
+  <header>
+    <% include ../../partials/admin/header %>
+  </header>
+
   <body class="bg-light">
-    <header>
-      <% include ../../partials/admin/header %>
-    </header>
-      
-    <main role="main" class="container">
-      <section class="jumbotron text-left">
-        <div class="container">
-          <% if (crawl._id == null) { %>
-            <h2>Create New Pub Crawl</h2>
-          <% } else { %>
-            <h2>Edit Pub Crawl</h2>
-            <div id="mapid" style="width: 600px; height: 400px;"></div>
-          <% } %>
-
-          <hr/>
-
-          <% if (Object.keys(errors).length == 1 && errors['error']) { %>
-            <div class="alert alert-warning" id="error" role="alert"><%= errors['error'] %></div>
-          <% } %>
-          <% if (crawl._id == null) { %>
-          <form action="<%= url('crawls/create') %>" method="post" class="needs-validation" novalidate>   
-          <% } else { %>
-          <form action="<%= url(`crawls/update/${crawl._id}`) %>" method="post" class="needs-validation" novalidate>
-          <% } %>
-            <div class="form-group">
-              <label>Name</label>
-              <input type="text" id="name" name="name" class="form-control <%= errors['name'] ? ' is-invalid' : '' %>" value="<%= crawl['name'] %>" placeholder="Pub crawl name"/><br/>
-              <div class="invalid-feedback">
-                Name must be filled out.
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Description</label>
-              <textarea id="description" name="description" class="form-control <%= errors['description'] ? ' is-invalid' : '' %>" placeholder="Pub crawl description"><%= crawl['description'] %></textarea>
-              <div class="invalid-feedback">
-                Description must be filled out.
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Start Date</label>
-              <input id="fromdate" name="fromdate" width="276" class="form-control <%= errors['fromdate'] ? ' is-invalid' : '' %>" value="<%= crawl['from'] ? moment(crawl['from']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
-              <div class="invalid-feedback">
-                A from date must be set.
-              </div>
-            </div>
-            <div class="form-group">
-              <label>End Date</label>
-              <input id="todate" name="todate" width="276" class="form-control <%= errors['todate'] ? ' is-invalid' : '' %>" value="<%= crawl['to'] ? moment(crawl['to']).format('HH:mm MM/DD/YYYY') : '' %>" readonly/>
-              <div class="invalid-feedback">
-                A to date must be set.
-              </div>
-            </div>
-            <% if (crawl.location != null) { %>
-            <div class="form-group">
-              <label>Address</label>
-              <input type="text" class="form-control" value="<%= crawl.location['placeName'] %>" readonly/><br/>
-              <label>GEO Coordinates</label>
-              <input type="text" class="form-control" value="[<%= crawl.location.polygon.coordinates %>]" readonly/><br/>
-              <label>Distance in meters</label>
-              <input type="text" class="form-control" value="<%= crawl.locationDistance %>" readonly/><br/>
-            </div>
-            <% } %>
-            <% if (crawl._id == null) { %>
-            <input type="submit" value="Create" class="btn btn-primary"/>
-            <% } else { %>
-            <input type="submit" value="Update" class="btn btn-primary"/>
-            <% } %>
-          </form>        
-
-          <% if (crawl._id)  { %>
-            <hr/>
-
-            <div>
-                <% include ../../partials/admin/crawls/location_list %>
-            </div>
-
-            <h3>Start Location</h3>
-            <form action="<%= url(`crawls/location/find/${crawl._id}`) %>" method="post">
-              <div class="form-group row">
-                <label for="startLocationAddress" class="col-sm-2 col-form-label">Address</label>
-                <div class="col-sm-10">
-                  <input type="text" name="address" class="form-control" id="startLocationAddress" placeholder="Address">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label for="startLocationDistance" class="col-sm-2 col-form-label">Distance</label>
-                <div class="col-sm-10">
-                  <input type="text" name="distance" class="form-control" id="startLocationDistance" placeholder="Distance in Meters, default 1000 m">
-                </div>
-              </div>  
-              <div class="form-group row">
-                <div class="col-sm-10">
-                  <button type="submit" class="btn btn-primary">Search</button>
-                </div>
-              </div>
-            </form>
-
-            <hr/>
-
-            <div id="pubs">
-                <% include ../../partials/admin/crawls/pub_list %>
-            </div>
-
-            <hr/>
-
-            <h3>Search Pubs</h3>
-            <form action="<%= url(`crawls/pub/find/${crawl._id}`) %>" method="post">
-              <div class="form-group row">
-                <label for="searchPubsAddress" class="col-sm-2 col-form-label">Address</label>
-                <div class="col-sm-10">
-                  <input type="text" name="address" class="form-control" id="searchPubsAddress" placeholder="Address">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label for="searchPubsDistance" class="col-sm-2 col-form-label">Distance</label>
-                <div class="col-sm-10">
-                  <input type="text" name="distance" class="form-control" id="searchPubsDistance" placeholder="Distance in Meters">
-                </div>
-              </div>
-              <div class="form-group row">
-                <label for="searchPubsPostcode" class="col-sm-2 col-form-label">Post&nbsp;Code</label>
-                <div class="col-sm-10">
-                  <input type="text" name="postcode" class="form-control" id="searchPubsPostcode" placeholder="PostCode">
-                </div>
-              </div>
-              <div class="form-group row">
-                <div class="col-sm-10">
-                  <button type="submit" class="btn btn-primary">Search</button>
-                </div>
-              </div>
-            </form>
-          <% } %>
+    <div class="jumbotron">
+      <div class="row">
+        <div class="col-md-6 order-md-1">
+          <% include ../../partials/admin/crawls/create_left_side %>
         </div>
-      </section>
-    </main>
+        <div class="col-md-6 order-md-2 mb-4">
+          <% include ../../partials/admin/crawls/create_right_side %>
+        </div>
+      </div>
+    </div>
   </body>
   
   <footer>
