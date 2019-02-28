@@ -13,7 +13,8 @@ var config = {
   accessToken: readFileSync('./token.txt', 'utf8'),
   mongoURI: 'mongodb://localhost:27017',
   databaseName: 'geo-spatial',
-  secret: 'session password..'
+  secret: 'session password..',
+  port: 8080
 };
 
 // Do we have a config file, read it
@@ -26,6 +27,7 @@ const accessToken = config.accessToken;
 const mongoURI = config.mongoURI;
 const databaseName = config.databaseName;
 const secret = config.secret;
+const port = config.port
 
 // Create session store
 const store = new MongoDBStore({
@@ -165,5 +167,5 @@ client.connect(async (err, client) => {
     res.render('index.ejs', { accessToken: accessToken });
   });
 
-  app.listen(8080);
+  app.listen(port);
 });
