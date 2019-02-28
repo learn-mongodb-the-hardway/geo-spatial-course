@@ -23,6 +23,7 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
+    "greenlock-express": "^2.6.7",
     "moment": "^2.24.0",
     "mongodb": "^3.1.13",
     "passport": "^0.4.0",
