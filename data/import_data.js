@@ -2,9 +2,23 @@ const { MongoClient } = require('mongodb');
 const { readFileSync, createReadStream } = require('fs');
 const readline = require('readline');
 
+// Default config
+var config = {
+  accessToken: existsSync('../token.txt') ? readFileSync('../token.txt', 'utf8') : '',
+  mongoURI: 'mongodb://localhost:27017',
+  databaseName: 'geo-spatial',
+  secret: 'session password..',
+  port: 8080
+};
+
+// Do we have a config file, read it
+if (existsSync('../config.json')) {
+  config = Object.assign(config, JSON.parse(readFileSync('./config.json', 'utf8')));
+}
+
 // Import settings
-const uri = "mongodb://localhost:27017";
-const databaseName = "geo-spatial";
+const uri = config.mongoURI;
+const databaseName = config.databaseName;
 const pubFile = "./london_pubs.geojson";
 const postCodeFile = "./postcodes.json";
 
