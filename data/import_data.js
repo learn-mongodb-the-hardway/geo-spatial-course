@@ -1,5 +1,5 @@
 const { MongoClient } = require('mongodb');
-const { readFileSync, createReadStream } = require('fs');
+const { readFileSync, createReadStream, existsSync } = require('fs');
 const readline = require('readline');
 
 // Default config
