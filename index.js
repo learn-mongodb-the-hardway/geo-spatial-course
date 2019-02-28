@@ -10,7 +10,7 @@ const crypto = require('crypto');
 
 // Default config
 var config = {
-  accessToken: readFileSync('./token.txt', 'utf8'),
+  accessToken: existsSync('./token.txt') ? readFileSync('./token.txt', 'utf8') : '',
   mongoURI: 'mongodb://localhost:27017',
   databaseName: 'geo-spatial',
   secret: 'session password..',
