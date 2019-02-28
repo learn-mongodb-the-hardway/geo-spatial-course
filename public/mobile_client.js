@@ -14,7 +14,7 @@ PubCrawlClient.prototype.setup = function(callback) {
 
   getGeoLocation(function(err, location) {
     if (err) {
-      return alert(err);
+      return alert("Please Enable Location Support, and reload the page");
     }
 
     // Unpack fields

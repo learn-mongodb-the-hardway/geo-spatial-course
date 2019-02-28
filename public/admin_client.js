@@ -14,8 +14,22 @@ AdminClient.prototype.setup = function() {
   var mapDivId = self.options.mapDivId;
   var accessToken = self.options.accessToken;
 
+  // Unpack options
+  var optionLocation = self.options.location
+  var searchPubs = self.options.searchPubs;
+  var pubs = self.options.pubs;
+  var locationDistance = self.options.locationDistance;
+  
+  // Set the initial coordinates
+  var initialCoordinates = [51.503605, -0.106506];
+
+  // Override the location
+  if (optionLocation && optionLocation.center) {
+    initialCoordinates = [optionLocation.center[1], optionLocation.center[0]];  
+  }
+
   // Create the mapbox view
-  self.mymap = L.map(mapDivId).setView([51.503605, -0.106506], 1);
+  self.mymap = L.map(mapDivId).setView(initialCoordinates, 1);
 
   // Set up the map
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + accessToken, {
@@ -29,14 +43,8 @@ AdminClient.prototype.setup = function() {
   // Get the current location
   getGeoLocation(function(err, location) {
     if (err) {
-      return alert(err);
+      return alert("Please Enable Location Support, and reload the page");
     }
-
-    // Unpack options
-    var optionLocation = self.options.location
-    var searchPubs = self.options.searchPubs;
-    var pubs = self.options.pubs;
-    var locationDistance = self.options.locationDistance;
 
     // Save the current location
     self.currentLocation = [location.latitude, location.longitude];
@@ -117,8 +125,7 @@ function addPub(options, pub) {
   // Post the pub id
   postJSON(options.url + "/add/" + options.id, pub, { parseJSON: false }, function(err, result) {
     if (err) {
-      console.log(err);
-      return alert("Failed to add Pub");
+      return alert("Failed to add pub to the pub crawl");
     }
 
     // We have the list of pubs

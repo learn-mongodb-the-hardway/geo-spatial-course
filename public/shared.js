@@ -21,7 +21,13 @@ class Location {
   }
 }
 
-function getGeoLocation(callback) {
+function getGeoLocation(callback, options) {
+  options = options || {
+    enableHighAccuracy: false,
+    maximumAge: 1000 * 60,
+    timeout: 1000 * 10
+  };
+
   var geoSuccess = function(position) {
     var location = new Location({
       accuracy: position.coords.accuracy,
@@ -40,7 +46,7 @@ function getGeoLocation(callback) {
     callback(error);
   }
 
-  navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
+  navigator.geolocation.getCurrentPosition(geoSuccess, geoError, options);
 }
 
 /**
