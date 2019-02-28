@@ -13,7 +13,7 @@ var config = {
 
 // Do we have a config file, read it
 if (existsSync('../config.json')) {
-  config = Object.assign(config, JSON.parse(readFileSync('./config.json', 'utf8')));
+  config = Object.assign(config, JSON.parse(readFileSync('../config.json', 'utf8')));
 }
 
 // Import settings
