@@ -43,6 +43,7 @@ AdminClient.prototype.setup = function() {
   // Get the current location
   getGeoLocation(function(err, location) {
     if (err) {
+      if (typeof console != 'undefined') console.log(err);
       return alert("Please Enable Location Support, and reload the page");
     }
 
