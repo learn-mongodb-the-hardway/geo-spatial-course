@@ -4,7 +4,7 @@
   "description": "The MongoDB Geo Spatial Course Application",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start index.js -i max --name pub-crawl",
+    "start": "pm2 start ssl_index.js -i max --name pub-crawl",
     "stop": "pm2 stop pub-crawl",
     "restart": "pm2 restart all",
     "lint": "eslint .",
