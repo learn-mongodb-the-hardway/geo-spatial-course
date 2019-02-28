@@ -1,0 +1,62 @@
+<% if (crawl._id)  { %>
+
+<div id="pubs">
+    <% include ./pub_list %>
+</div>
+
+<hr/>
+
+<h3>Set Start Location</h3>
+<form action="<%= url(`crawls/location/find/${crawl._id}`) %>" method="post">
+  <div class="form-group row">
+    <label for="startLocationAddress" class="col-sm-2 col-form-label">Address</label>
+    <div class="col-sm-10">
+      <input type="text" name="address" class="form-control" id="startLocationAddress" placeholder="Address">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="startLocationDistance" class="col-sm-2 col-form-label">Distance</label>
+    <div class="col-sm-10">
+      <input type="text" name="distance" class="form-control" id="startLocationDistance" placeholder="Distance in Meters, default 1000 m">
+    </div>
+  </div>  
+  <div class="form-group row">
+    <div class="col-sm-10">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </div>
+</form>
+
+<div>
+    <% include ./location_list %>
+</div>
+
+<hr/>
+
+<h3>Search Pubs</h3>
+<form action="<%= url(`crawls/pub/find/${crawl._id}`) %>" method="post">
+  <div class="form-group row">
+    <label for="searchPubsAddress" class="col-sm-2 col-form-label">Address</label>
+    <div class="col-sm-10">
+      <input type="text" name="address" class="form-control" id="searchPubsAddress" placeholder="Address">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="searchPubsDistance" class="col-sm-2 col-form-label">Distance</label>
+    <div class="col-sm-10">
+      <input type="text" name="distance" class="form-control" id="searchPubsDistance" placeholder="Distance in Meters, default 1000 m">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="searchPubsPostcode" class="col-sm-2 col-form-label">Post&nbsp;Code</label>
+    <div class="col-sm-10">
+      <input type="text" name="postcode" class="form-control" id="searchPubsPostcode" placeholder="PostCode">
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-sm-10">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </div>
+</form>
+<% } %>
