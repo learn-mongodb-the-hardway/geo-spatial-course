@@ -1,5 +1,5 @@
 const express = require('express');
-const { readFileSync } = require('fs');
+const { readFileSync, existsSync } = require('fs');
 const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const session = require('express-session');
@@ -8,15 +8,28 @@ const passport = require('passport');
 const { Strategy } = require('passport-local');
 const crypto = require('crypto');
 
+// Default config
+var config = {
+  accessToken: readFileSync('./token.txt', 'utf8'),
+  mongoURI: 'mongodb://localhost:27017',
+  databaseName: 'geo-spatial',
+  secret: 'session password..'
+};
+
+// Do we have a config file, read it
+if (existsSync('./config.json')) {
+  config = Object.assign(config, JSON.parse(readFileSync('./config.json', 'utf8')));
+}
+
 // Startup variables
-const accessToken = readFileSync('./token.txt', 'utf8'); // Access token for map-box
-const mongoURI = 'mongodb://localhost:27017';
-const databaseName = 'geo-spatial';
-const secret = 'session password..';
+const accessToken = config.accessToken;
+const mongoURI = config.mongoURI;
+const databaseName = config.databaseName;
+const secret = config.secret;
 
 // Create session store
 const store = new MongoDBStore({
-  uri: 'mongodb://localhost:27017/connect_mongodb_session_test',
+  uri: mongoURI,
   databaseName: databaseName,
   collection: 'sessions'
 });
