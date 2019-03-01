@@ -61,7 +61,7 @@ describe("/crawls/pub Routes", () => {
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId
       }, body: {
         _id: ObjectId().toString()
@@ -92,7 +92,7 @@ describe("/crawls/pub Routes", () => {
       await pub.create(pubDoc._id, pubDoc.name, pubDoc.geometry, pubDoc.street, pubDoc.housenumber, pubDoc.postcode, pubDoc.city, {});
     
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId
       }, body: {
         _id: pubId.toString()
@@ -136,7 +136,7 @@ describe("/crawls/pub Routes", () => {
       ], {});
     
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId, pubId: pubId.toString()
       }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
@@ -171,7 +171,7 @@ describe("/crawls/pub Routes", () => {
       ], {});
     
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId, pubId: pubId.toString()
       }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
@@ -215,7 +215,7 @@ describe("/crawls/pub Routes", () => {
       ], {});
     
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId, pubId: secondPubId.toString()
       }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
@@ -256,7 +256,7 @@ describe("/crawls/pub Routes", () => {
       ], {});
     
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId, pubId: ObjectId()
       }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
@@ -297,7 +297,7 @@ describe("/crawls/pub Routes", () => {
       ], {});
     
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId, pubId: pubId
       }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
@@ -344,7 +344,7 @@ describe("/crawls/pub Routes", () => {
       var setupOptions = null;
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId
       }, body: {
         address: "N1 1RU"
@@ -407,7 +407,7 @@ describe("/crawls/pub Routes", () => {
       var setupOptions = null;
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId
       }, body: {
         postcode: "N1"
@@ -471,7 +471,7 @@ describe("/crawls/pub Routes", () => {
       var setupOptions = null;
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl, pub, user, postcode }, params: {
         crawlId: crawlId
       }, body: {}, session: {}, options: {
         accessToken: accessToken

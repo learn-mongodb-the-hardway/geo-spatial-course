@@ -51,7 +51,7 @@ describe("/crawls/create Routes", () => {
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {
         // crawlId: crawlId
-      }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
+      }, models: { crawl }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
@@ -79,7 +79,7 @@ describe("/crawls/create Routes", () => {
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {
         crawlId: crawlId
-      }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
+      }, models: { crawl }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
@@ -101,7 +101,7 @@ describe("/crawls/create Routes", () => {
       const crawlId = ObjectId();
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {
-      }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
+      }, models: { crawl }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
         assert(url.indexOf('/error?error=') != -1);
       }});
@@ -119,7 +119,7 @@ describe("/crawls/create Routes", () => {
       const username = ObjectId().toString();
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {}, body: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {}, body: {
         name: 'My test crawl', description: 'My test crawl',
         fromdate: moment(new Date()).format('HH:mm MM/DD/YYYY'),
         todate: moment(new Date()).format('HH:mm MM/DD/YYYY')
@@ -160,7 +160,7 @@ describe("/crawls/create Routes", () => {
       const username = ObjectId().toString();
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {}, body: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {}, body: {
         name: 'My test crawl'
       }, session: {}, options: {}, baseUrl: '/admin', user: {
         username: username

@@ -57,7 +57,7 @@ describe("/crawls/location Routes", () => {
       });
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {
         crawlId: crawlId
       }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
@@ -109,7 +109,7 @@ describe("/crawls/location Routes", () => {
       });
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {
         crawlId: crawlId
       }, body: {}, session: {}, options: {
         accessToken: accessToken
@@ -137,7 +137,7 @@ describe("/crawls/location Routes", () => {
       });
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {
         crawlId: crawlId
       }, body: {
         address: 'N1'

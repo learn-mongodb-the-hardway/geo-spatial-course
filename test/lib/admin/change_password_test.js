@@ -48,7 +48,7 @@ describe("/crawls/create Routes", () => {
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {
         // crawlId: crawlId
-      }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
+      }, body: {}, session: {}, options: {}, baseUrl: '/admin', models: { user }})
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
@@ -76,7 +76,7 @@ describe("/crawls/create Routes", () => {
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {}, body: {
+      const req = mockRequest({ db: database, models: { user }, params: {}, body: {
         current_password: 'petrus_100', password: 'petrus_200', confirm_password: 'petrus_200'
       }, session: {}, options: {}, baseUrl: '/admin', user: userDoc })
       const res = mockResponse({ redirect: async function(url) {
@@ -106,7 +106,7 @@ describe("/crawls/create Routes", () => {
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {}, body: {
+      const req = mockRequest({ db: database, models: { user }, params: {}, body: {
         // current_password: 'petrus_100', password: 'petrus_200', confirm_password: 'petrus_200'
       }, session: {}, options: {}, baseUrl: '/admin', user: userDoc })
       const res = mockResponse({ redirect: async function(url) {
@@ -133,7 +133,7 @@ describe("/crawls/create Routes", () => {
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {}, body: {
+      const req = mockRequest({ db: database, models: { user }, params: {}, body: {
         current_password: 'petrus_600', password: 'petrus_100', confirm_password: 'petrus_200'
       }, session: {}, options: {}, baseUrl: '/admin', user: userDoc })
       const res = mockResponse({ redirect: async function(url) {
@@ -158,7 +158,7 @@ describe("/crawls/create Routes", () => {
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {}, body: {
+      const req = mockRequest({ db: database, models: { user }, params: {}, body: {
         current_password: 'petrus_300', password: 'petrus_200', confirm_password: 'petrus_200'
       }, session: {}, options: {}, baseUrl: '/admin', user: userDoc })
       const res = mockResponse({ redirect: async function(url) {

@@ -45,7 +45,7 @@ describe("Admin /create Route", () => {
     it('render /login', async () => {
       var doc = null;
       // Prepare the mock request
-      const req = mockRequest({ db: database, body: {}, session: {}, options: {}, baseUrl: '/admin'})
+      const req = mockRequest({ db: database, models: { user }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
         doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
@@ -67,7 +67,7 @@ describe("Admin /create Route", () => {
     it('all fields are null', async () => {
       var doc = null;
       // Prepare the mock request
-      const req = mockRequest({ db: database, body: {}, session: {}, options: {}, baseUrl: '/admin'})
+      const req = mockRequest({ db: database, models: { user }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
         doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
@@ -86,7 +86,7 @@ describe("Admin /create Route", () => {
     it('password and confirm_password not equal', async () => {
       var doc = null;
       // Prepare the mock request
-      const req = mockRequest({ db: database, body: {
+      const req = mockRequest({ db: database, models: { user }, body: {
         name: 'petrus', username: 'petrus', password: 'pass', confirm_password: 'pass2' 
       }, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
@@ -110,7 +110,7 @@ describe("Admin /create Route", () => {
 
     it('successfully create a new user', async () => {
       // Prepare the mock request
-      const req = mockRequest({ db: database, body: {
+      const req = mockRequest({ db: database, models: { user }, body: {
         name: 'petrus', username: 'petrus', password: 'pass', confirm_password: 'pass' 
       }, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {

@@ -72,7 +72,7 @@ describe("Mobile Tests", () => {
         var doc = null;
         var mobileSetupExecuted = false;
         // Prepare the mock request
-        const req = mockRequest({ db: database, body: {}, session: {}, options: {}})
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {}, session: {}, options: {}})
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
           doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
@@ -99,7 +99,7 @@ describe("Mobile Tests", () => {
         await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {})
 
         // Prepare the mock request
-        const req = mockRequest({ db: database, body: {}, session: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {}, session: {
           crawlId: crawlId
         }, options: {}, user: {}})
 
@@ -141,7 +141,7 @@ describe("Mobile Tests", () => {
         // Create a new pub crawl
         await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
 
-        const req = mockRequest({ db: database, body: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {
           latitude: 51.52644050785097,
           longitude: -0.09700222888083221,
           timestamp: new Date().getTime()
@@ -167,7 +167,7 @@ describe("Mobile Tests", () => {
         await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], 
           {"location":{"polygon":{"type":"Polygon","coordinates":[[[-0.105026,51.54289315284119],[-0.10784387906053175,51.542720510333936],[-0.11055340651085396,51.54220922120916],[-0.11305040409292269,51.54137894496253],[-0.11523887843091213,51.54026160501795],[-0.11703471535614414,51.538900159433894],[-0.1183689142408354,51.5373469471079],[-0.11919023776292799,51.53566167348195],[-0.11946717556292472,51.53390911360477],[-0.11918914714956234,51.53215662120039],[-0.1183668990500802,51.53047153972078],[-0.11703208238249248,51.52891861496208],[-0.1152360285207121,51.52755750858678],[-0.11304777111916775,51.52644050785097],[-0.11055139131995274,51.52561051917166],[-0.10784278844706285,51.52509942219323],[-0.105026,51.5249268471588],[-0.10220921155293712,51.52509942219323],[-0.09950060868004722,51.52561051917166],[-0.09700422888083221,51.52644050785097],[-0.09481597147928786,51.52755750858678],[-0.0930199176175075,51.52891861496208],[-0.09168510094991977,51.53047153972078],[-0.09086285285043763,51.53215662120039],[-0.09058482443707525,51.53390911360477],[-0.09086176223707199,51.53566167348195],[-0.09168308575916458,51.5373469471079],[-0.09301728464385584,51.538900159433894],[-0.09481312156908785,51.54026160501795],[-0.0970015959070773,51.54137894496253],[-0.09949859348914601,51.54220922120916],[-0.10220812093946822,51.542720510333936],[-0.105026,51.54289315284119]]]}}});
 
-        const req = mockRequest({ db: database, body: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {
           latitude: 51.53389661886214,
           longitude: -0.10578632354736328,
           timestamp: new Date().getTime()
@@ -208,7 +208,7 @@ describe("Mobile Tests", () => {
     describe("get", () => {
       it("user is not logged in", async () => {
         var result = null;
-        const req = mockRequest({ db: database, body: {}, session: {}, options: {}})
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {}, session: {}, options: {}})
         const res = mockResponse({ send: async function(object) {
           result = object;
         }});
@@ -221,7 +221,7 @@ describe("Mobile Tests", () => {
 
       it("user is logged in and passed geo coordinates", async () => {
         // Create mock req/res
-        const req = mockRequest({ db: database, body: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {
           longitude: -0.12184739112854004, latitude: 51.58095822359073
         }, session: {}, user: {
           _id: attendantId
@@ -253,7 +253,7 @@ describe("Mobile Tests", () => {
         await crawl.addAttendantToPub(crawlId, secondPubId, attendantId);
 
         // Create mock req/res
-        const req = mockRequest({ db: database, body: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {
           longitude: -0.12184739112854004, latitude: 51.58095822359073
         }, session: {
           crawlId: crawlId
@@ -308,8 +308,10 @@ describe("Mobile Tests", () => {
         await crawl.addAttendantToPub(crawlId, secondPubId, attendantId);
 
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {
           loggedIn: true, userId: attendantId, crawlId: crawlId
+        }, user: {
+          _id: attendantId
         }, options: {}, logout: () => { logoutCalled = true }})
 
         const res = mockResponse({ redirect: async function(link) {
@@ -349,7 +351,7 @@ describe("Mobile Tests", () => {
     describe("get", () => {
       it("existing user joining non existing pub crawl", async () => {
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {
           loggedIn: true, userId: attendantId
         }, params: {
           crawlId: "5c73f17b5bfcf887753bc0fe"
@@ -368,7 +370,7 @@ describe("Mobile Tests", () => {
       it("existing user joining non existing pub crawl", async () => {
         var doc = null;
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {}, params: {
           crawlId: crawlId.toString()
         }, options: {}})
         const res = mockResponse({ render: async function(template, object = {}) {
@@ -395,7 +397,7 @@ describe("Mobile Tests", () => {
 
       it("existing user joining an existing pub crawl", async () => {
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {}, params: {
           crawlId: crawlId.toString()
         }, user: {
           _id: attendantId
@@ -420,7 +422,7 @@ describe("Mobile Tests", () => {
       it("Posting with all fields missing", async () => {
         var doc = null;
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {
           loggedIn: true, userId: attendantId
         }, params: {
           crawlId: crawlId
@@ -450,7 +452,7 @@ describe("Mobile Tests", () => {
         var result = null;
 
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {
           loggedIn: true, userId: attendantId
         }, params: {
           crawlId: crawlId
@@ -504,7 +506,7 @@ describe("Mobile Tests", () => {
       it("should correctly add the expected fields", async () => {
         var result = null;
         // Create mock req/res
-        const req = mockRequest({ db: database, baseUrl: '/', session: {}, params: {
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {}, params: {
           crawlId: crawlId
         }, user: {
           _id: attendantId

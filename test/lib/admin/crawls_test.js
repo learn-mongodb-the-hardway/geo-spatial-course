@@ -53,7 +53,7 @@ describe("/crawls/location Routes", () => {
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {}, body: {}, session: {}, options: {}, user: {
         username: "peter"
-      }, baseUrl: '/admin'})
+      }, models: { crawl }, baseUrl: '/admin'})
       const res = mockResponse({ redirect: async function(url) {
       }, render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});

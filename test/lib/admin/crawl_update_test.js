@@ -52,7 +52,7 @@ describe("/crawls/location Routes", () => {
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", crawlId.toString(), new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {
         crawlId: crawlId
       }, body: {
         name: 'Crawl 2', description: 'Crawl 2 Description',
@@ -96,7 +96,7 @@ describe("/crawls/location Routes", () => {
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", crawlId.toString(), new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
 
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {
         crawlId: crawlId
       }, body: {}, session: {}, options: {}, user: {
         username: crawlId.toString()
@@ -121,7 +121,7 @@ describe("/crawls/location Routes", () => {
       const crawlId = ObjectId();
       var result = null;
       // Prepare the mock request
-      const req = mockRequest({ db: database, params: {
+      const req = mockRequest({ db: database, models: { crawl }, params: {
         crawlId: crawlId
       }, body: {}, session: {}, options: {}, user: {
         username: crawlId.toString()

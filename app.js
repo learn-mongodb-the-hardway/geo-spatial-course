@@ -7,6 +7,13 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const { Strategy } = require('passport-local');
 const crypto = require('crypto');
+const { hashPassword } = require('./lib/shared');
+
+// Grab all models
+const { User } = require('./lib/models/user');
+const { Crawl } = require('./lib/models/crawl');
+const { Pub } = require('./lib/models/pub');
+const { PostCode } = require('./lib/models/postcode');
 
 // Default config
 var config = {
@@ -19,7 +26,7 @@ var config = {
 
 // Do we have a config file, read it
 if (existsSync('./config.json')) {
-  config = Object.assign(config, JSON.parse(readFileSync('./config.json', 'utf8')));
+  config = Object.assign(config,  JSON.parse(readFileSync('./config.json', 'utf8')));
 }
 
 // Startup variables
@@ -111,9 +118,7 @@ client.connect(async (err, client) => {
         if (!user) { return cb(null, false); }
 
         // Hash the password
-        const hash = crypto.createHash('sha256');
-        hash.write(password);
-        const hashedPassword = hash.digest('hex');
+        const hashedPassword = hashPassword(password);
 
         // Check if the hashed password is the same
         if (user.password != hashedPassword) { return cb(null, false); }
@@ -148,11 +153,23 @@ client.connect(async (err, client) => {
 
   // Add the additional fields to the request
   app.use((req, res, next) => {
+
+    // Add the database
     req.db = client.db(databaseName);
+    // Add the options
     req.options = {
       accessToken: accessToken, secret: secret
     }
 
+    // Add the models
+    req.models = {
+      user: new User(req.db.collection('users')),
+      crawl: new Crawl(req.db.collection('crawls')),
+      pub: new Pub(req.db.collection('pubs')),
+      postcode: new PostCode(req.db.collection('postcodes'))
+    }
+
+    // Call next middleware
     next();
   });
 
