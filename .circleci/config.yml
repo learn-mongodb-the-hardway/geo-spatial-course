@@ -32,18 +32,18 @@ jobs:
       enable: true
     working_directory: ~/geo-spatial-course
     steps:
-			- deploy:
-					name: digital-ocean
-					command: ssh -o "StrictHostKeyChecking no" pubcrawl@134.209.65.161 "cd ~/geo-spatial-course; git pull; npm install; npm restart"
+      - deploy:
+          name: digital-ocean
+          command: ssh -o "StrictHostKeyChecking no" pubcrawl@134.209.65.161 "cd ~/geo-spatial-course; git pull; npm install; npm restart"
 
 workflows:
-	version: 2
-	build-and-deploy:
-		jobs:
-			- build
-			- deploy:
-				requires:
-					- build
-				filters:
-					branches:
-						only: master
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+        requires:
+          - build
+        filters:
+          branches:
+            only: master
