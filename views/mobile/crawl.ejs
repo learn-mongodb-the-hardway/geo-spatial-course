@@ -4,6 +4,7 @@
     <% include ../partials/mobile/head %>
     <style>
       #mapid { height: calc(100% - 60px); width: 100%; position: absolute !important; }
+      #attendants { height: calc(100% - 60px); width: 100%; position: absolute !important; }
     </style>
   </head>
 
@@ -13,13 +14,18 @@
 
   <body>
     <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
-      <div class="container">
-        <button id="centermap" class="btn btn-primary">Center</button>
-        <button id="nextpub" class="btn btn-primary">Next Pub</button>
-        <a href="/mobile/leave" id="leavecrawl" class="btn btn-primary" role="button" aria-disabled="true">Leave</a>
+      <div class="container">      
+        <button id="centermap" class="btn btn-primary"><i class="fas fa-compass"></i></button>
+        <button id="attendantsbutton" class="btn btn-primary"><i class="fas fa-users"></i><span class="badge badge-primary badge-pill"><%= doc.attendants ? doc.attendants.length : 0 %></span></button>
+        <button id="mapbutton" class="btn btn-primary d-none"><i class="fas fa-map"></i></button>
+        <button id="nextpub" class="btn btn-primary"><i class="fas fa-beer"></i></button>
+        <a href="/mobile/leave" id="leavecrawl" class="btn btn-primary" role="button" aria-disabled="true"><i class="fas fa-sign-out-alt"></i></a>
       </div>
     </nav>
-    <div id="mapid" ></div>
+    <div>
+      <div id="mapid" class=""></div>
+      <div id="attendants" class="d-none"></div>
+    </div>
   </body>
 
   <footer>
@@ -45,5 +51,26 @@
     $('#nextpub').on('click', function() {
       pubcrawlClient.centerNextPub();
     });
+
+    // Toggle function
+    function toggleMapAttendants() {
+      // Hide controls
+      $('#attendantsbutton').toggleClass('d-none');
+      $('#mapid').toggleClass('d-none');
+
+      // Show controls
+      $('#attendants').toggleClass('d-none');
+      $('#mapbutton').toggleClass('d-none');
+    }
+
+    // Show an hide buttons
+    $('#attendantsbutton').on('click', function() {
+      // Load the attendants
+      pubcrawlClient.loadAttendants("attendants");
+      // Show the attendants
+      toggleMapAttendants();
+    });
+    // Show an hide buttons
+    $('#mapbutton').on('click', toggleMapAttendants);
   </script>
 </html>

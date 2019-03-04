@@ -13,6 +13,9 @@
       <div class="alert alert-warning" role="alert"><%= errors['error'] %></div>
     <% } %>
     <div class="container">
+      <% if (typeof messages != 'undefined' && messages.length == 1) { %>
+        <div class="alert alert-warning" id="error" role="alert"><%= messages[0] %></div>
+      <% } %>
       <div id="crawls"></div>
     </div>
     <div id="mapid" style="width: 600px; height: 400px;"></div>

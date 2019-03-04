@@ -101,6 +101,21 @@ PubCrawlClient.prototype.invalidateSize = function() {
   }
 }
 
+PubCrawlClient.prototype.loadAttendants = function(id, callback) {
+  // Unpack crawlId
+  var crawlId = this.options.pubCrawl && this.options.pubCrawl._id
+    ? this.options.pubCrawl._id
+    : null;
+
+  getJSON('/mobile/attendants/' + crawlId, 
+    { parseJSON: false}, function(err, result) {
+      if (err) return alert(err);
+      setDiv(id, result);
+
+      if (callback) callback(err, result);
+    });
+}
+
 PubCrawlClient.prototype.centerNextPub = function() {
   if (this.pubs.length) {
     // Get this or next index

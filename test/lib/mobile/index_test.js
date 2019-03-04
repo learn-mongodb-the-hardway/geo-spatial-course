@@ -72,7 +72,7 @@ describe("Mobile Tests", () => {
         var doc = null;
         var mobileSetupExecuted = false;
         // Prepare the mock request
-        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {}, session: {}, options: {}})
+        const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {}, session: {}, options: {}, flash: function() {}})
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
           doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
@@ -101,7 +101,7 @@ describe("Mobile Tests", () => {
         // Prepare the mock request
         const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {}, session: {
           crawlId: crawlId
-        }, options: {}, user: {}})
+        }, options: {}, user: {}, flash: function() {}})
 
         const res = mockResponse({ render: async function(template, object) {
           const result = await ejs.renderFile(`views/${template}`, object || {});
