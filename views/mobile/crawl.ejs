@@ -13,14 +13,14 @@
       <div class="container">      
         <button id="centermap" class="btn btn-primary"><i class="fas fa-compass"></i></button>
         <button id="attendantsbutton" class="btn btn-primary"><i class="fas fa-users"></i><span class="badge badge-primary badge-pill"><%= doc.attendants ? doc.attendants.length : 0 %></span></button>
-        <button id="mapbutton" class="btn btn-primary d-none"><i class="fas fa-map"></i></button>
+        <button id="mapbutton" class="btn btn-primary"><i class="fas fa-map"></i></button>
         <button id="nextpub" class="btn btn-primary"><i class="fas fa-beer"></i></button>
         <a href="/mobile/leave" id="leavecrawl" class="btn btn-primary" role="button" aria-disabled="true"><i class="fas fa-sign-out-alt"></i></a>
       </div>
     </nav>
     <div>
       <div id="mapid"></div>
-      <div id="attendants" class="d-none"></div>
+      <div id="attendants"></div>
     </div>
   </body>
 
@@ -48,15 +48,31 @@
       pubcrawlClient.centerNextPub();
     });
 
-    // Toggle function
-    function toggleMapAttendants() {
-      // Hide controls
-      $('#attendantsbutton').toggleClass('d-none');
-      $('#mapid').toggleClass('d-none');
+    // // Toggle function
+    // function toggleMapAttendants() {
+    //   // Hide controls
+    //   $('#attendantsbutton').toggleClass('d-none');
+    //   $('#mapid').toggleClass('d-none');
 
-      // Show controls
-      $('#attendants').toggleClass('d-none');
-      $('#mapbutton').toggleClass('d-none');
+    //   // Show controls
+    //   $('#attendants').toggleClass('d-none');
+    //   $('#mapbutton').toggleClass('d-none');
+    // }
+
+    function showMap() {
+      $('#attendants').hide();
+      $('#mapbutton').hide();
+      
+      $('#mapid').show();
+      $('#attendantsbutton').show();
+    }
+
+    function showAttendants() {
+      $('#attendants').show();
+      $('#mapbutton').show();
+
+      $('#mapid').hide();
+      $('#attendantsbutton').hide();
     }
 
     // Show an hide buttons
@@ -64,24 +80,30 @@
       // Load the attendants
       pubcrawlClient.loadAttendants("attendants");
       
-      // Hide controls
-      $('#attendantsbutton').addClass('d-none');
-      $('#mapid').addClass('d-none');
+      // Show attendants
+      showAttendants();
 
-      // Show controls
-      $('#attendants').removeClass('d-none');
-      $('#mapbutton').removeClass('d-none');
+      // // Hide controls
+      // $('#attendantsbutton').addClass('d-none');
+      // $('#mapid').addClass('d-none');
+
+      // // Show controls
+      // $('#attendants').removeClass('d-none');
+      // $('#mapbutton').removeClass('d-none');
     });
 
     // Show an hide buttons
     $('#mapbutton').on('click', function() {
-      // Hide controls
-      $('#attendants').addClass('d-none');
-      $('#mapbutton').addClass('d-none');
+      showMap();
+      // // Hide controls
+      // $('#attendants').addClass('d-none');
+      // $('#mapbutton').addClass('d-none');
 
-      // Show controls
-      $('#attendantsbutton').removeClass('d-none');
-      $('#mapid').removeClass('d-none');
+      // // Show controls
+      // $('#attendantsbutton').removeClass('d-none');
+      // $('#mapid').removeClass('d-none');
     });
+
+    showMap();
   </script>
 </html>
