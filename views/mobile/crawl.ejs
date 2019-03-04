@@ -48,17 +48,6 @@
       pubcrawlClient.centerNextPub();
     });
 
-    // // Toggle function
-    // function toggleMapAttendants() {
-    //   // Hide controls
-    //   $('#attendantsbutton').toggleClass('d-none');
-    //   $('#mapid').toggleClass('d-none');
-
-    //   // Show controls
-    //   $('#attendants').toggleClass('d-none');
-    //   $('#mapbutton').toggleClass('d-none');
-    // }
-
     function showMap() {
       $('#attendants').hide();
       $('#mapbutton').hide();
@@ -76,32 +65,22 @@
     }
 
     // Show an hide buttons
-    $('#attendantsbutton').on('click', function() {
+    $('#attendantsbutton').on('click', function(event) {
+      event.preventDefault();
+  
       // Load the attendants
       pubcrawlClient.loadAttendants("attendants");
       
       // Show attendants
       showAttendants();
-
-      // // Hide controls
-      // $('#attendantsbutton').addClass('d-none');
-      // $('#mapid').addClass('d-none');
-
-      // // Show controls
-      // $('#attendants').removeClass('d-none');
-      // $('#mapbutton').removeClass('d-none');
     });
 
     // Show an hide buttons
     $('#mapbutton').on('click', function() {
-      showMap();
-      // // Hide controls
-      // $('#attendants').addClass('d-none');
-      // $('#mapbutton').addClass('d-none');
+      event.preventDefault();
 
-      // // Show controls
-      // $('#attendantsbutton').removeClass('d-none');
-      // $('#mapid').removeClass('d-none');
+      // Show the map
+      showMap();
     });
 
     showMap();
