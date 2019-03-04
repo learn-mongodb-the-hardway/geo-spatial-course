@@ -34,7 +34,7 @@ jobs:
     steps:
       - deploy:
           name: digital-ocean
-          command: ssh -o "StrictHostKeyChecking no" pubcrawl@134.209.65.161 "cd ~/geo-spatial-course; git pull; npm install; npm restart"
+          command: ssh -o "StrictHostKeyChecking no" pubcrawl@134.209.65.161 "cd ~/geo-spatial-course; rm ~/geo-spatial-course/package-lock.json; git pull; npm install; npm restart"
 
 workflows:
   version: 2
