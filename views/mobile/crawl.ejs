@@ -19,7 +19,7 @@
       </div>
     </nav>
     <div>
-      <div id="mapid" class=""></div>
+      <div id="mapid"></div>
       <div id="attendants" class="d-none"></div>
     </div>
   </body>
@@ -63,10 +63,25 @@
     $('#attendantsbutton').on('click', function() {
       // Load the attendants
       pubcrawlClient.loadAttendants("attendants");
-      // Show the attendants
-      toggleMapAttendants();
+      
+      // Hide controls
+      $('#attendantsbutton').addClass('d-none');
+      $('#mapid').addClass('d-none');
+
+      // Show controls
+      $('#attendants').removeClass('d-none');
+      $('#mapbutton').removeClass('d-none');
     });
+
     // Show an hide buttons
-    $('#mapbutton').on('click', toggleMapAttendants);
+    $('#mapbutton').on('click', function() {
+      // Hide controls
+      $('#attendants').addClass('d-none');
+      $('#mapbutton').addClass('d-none');
+
+      // Show controls
+      $('#attendantsbutton').removeClass('d-none');
+      $('#mapid').removeClass('d-none');
+    });
   </script>
 </html>

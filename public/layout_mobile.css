@@ -5,5 +5,26 @@
   position: absolute !important;
 }
 
-#mapid { height: calc(100% - 60px); width: 100%; position: absolute !important; }
-#attendants { height: calc(100% - 60px); width: 100%; position: absolute !important; }
+.card-link {
+  position: relative;
+  z-index: 100;
+}
+
+#mapid { 
+  height: calc(100% - 60px); 
+  width: calc(100%);
+  position: absolute !important; 
+}
+
+/* .att {
+  height: calc(100% + 20px); 
+  width: calc(100%);
+  position: absolute !important; 
+
+} */
+
+#attendants { 
+  height: calc(100% - 90px); 
+  width: calc(100%);
+  position: absolute !important; 
+}
