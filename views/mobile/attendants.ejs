@@ -1,12 +1,12 @@
 <div class="jumbotron" style="height:1000px">
-<div class="card">
-  <div class="card-header">
-    Attendants
+  <div class="card">
+    <div class="card-header">
+      Attendants
+    </div>
+    <ul class="list-group">
+      <% for (var attendant of attendants) { %>
+        <li class="list-group-item"><%= attendant.name %></li>
+      <% } %>
+    </ul>
   </div>
-  <ul class="list-group">
-    <% for (var attendant of attendants) { %>
-      <li class="list-group-item"><%= attendant.name %></li>
-    <% } %>
-  </ul>
-</div>
 </div>

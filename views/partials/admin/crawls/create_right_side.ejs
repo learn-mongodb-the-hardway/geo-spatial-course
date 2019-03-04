@@ -7,6 +7,9 @@
 <hr/>
 
 <h3>Set Start Location</h3>
+<div class="alert alert-dark" role="alert">
+  Set the pub crawl starting address and the size of the starting circle in meters from the address.
+</div>
 <form action="<%= url(`crawls/location/find/${crawl._id}`) %>" method="post">
   <div class="form-group row">
     <label for="startLocationAddress" class="col-sm-2 col-form-label">Address</label>
@@ -34,6 +37,16 @@
 <hr/>
 
 <h3>Search Pubs</h3>
+<div class="alert alert-dark" role="alert">
+  Search for pubs either the <b>address and distance</b> field or the <b>post code</b> field <p/>
+  
+  <ul>
+    <li>Specific address and a distance radius in meters.</li>
+    <li>A postcode (Example: N1)
+  </ul>
+
+  On the map click on the markers or shapes to add the pubs to the pub crawl.
+</div>
 <form action="<%= url(`crawls/pub/find/${crawl._id}`) %>" method="post">
   <div class="form-group row">
     <label for="searchPubsAddress" class="col-sm-2 col-form-label">Address</label>
@@ -59,4 +72,18 @@
     </div>
   </div>
 </form>
+<% } else { %>
+<div class="alert alert-dark" role="alert">
+  <h5>Creating a new pub crawl</h5>
+  In the first step we require the following fields to be filled out.
+
+  <p>
+    <ul>
+      <li><strong>Name:</strong> The name of the pub crawl. An example might be <i>Peters Celebration Pub Walk</i>.</li>
+      <li><strong>Description:</strong> A description of the pub crawl, Give details about starting location, time and dress code.</li>
+      <li><strong>Start Date:</strong> The start date and time of the pub crawl. The pub crawl will be possible to join after the given date and time.</li>
+      <li><strong>End Date:</strong> The end start date and time of the pub crawl. The pub crawl will be over after the provided date and time.</li>
+    </ul>
+  </p>
+</div>
 <% } %>

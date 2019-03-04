@@ -1,0 +1,9 @@
+.card {
+  height: calc(100% - 30px); 
+  width: calc(100% - 30px);
+  margin-top: 10px;
+  position: absolute !important;
+}
+
+#mapid { height: calc(100% - 60px); width: 100%; position: absolute !important; }
+#attendants { height: calc(100% - 60px); width: 100%; position: absolute !important; }

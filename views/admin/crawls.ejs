@@ -7,17 +7,21 @@
     <header>
       <% include ../partials/admin/header %>
     </header>
-      
-      <main role="main" class="container">
-        <section class="jumbotron text-left">
-          <div class="row">
+
+    <main role="main" class="container">
+      <section class="jumbotron text-left">
+        <div class="row">
             <div class="well">
               <h3>Pub Crawls</h3>
+              <div class="alert alert-dark" role="alert">
+                The list of created pub crawls, click the Create Link to create a new pub crawl.
+              </div>
               <table class="table table-striped">
                 <thead class="thead-dark">
                   <th scope="col">Name</th>
                   <th scope="col">Description</th>
                   <th scope="col">Starting Location</th>
+                  <th scope="col">#Attendants</th>
                   <th scope="col">Start Time</th>
                   <th scope="col">End Time</th>
                   <th scope="col"></th>
@@ -29,6 +33,9 @@
                       <td scope="row"><%= doc.description %></td>
                       <td scope="row">
                         <%= doc['location'] && doc['location']['placeName'] ? doc['location']['placeName'] : '' %>
+                      </td>
+                      <td scope="row" class="text-center">
+                        <%= doc['attendants'] ? doc['attendants'].length : 0 %>
                       </td>
                       <td scope="row">
                         <%= doc['from'] ? moment(doc['from']).format('HH:mm MM/DD/YYYY') : '' %>
@@ -42,7 +49,7 @@
                           <a href="<%= url(`crawls/publish/${doc._id}`) %>">[Publish]</a>
                         <% } %>
                         <% if (doc.published) { %>
-                          <a href="<%= url(`crawls/unpublish/${doc._id}`) %>">[Un-Publish]</a>
+                          <a href="<%= url(`crawls/unpublish/${doc._id}`) %>">[Unpublish]</a>
                         <% } %>
                       </td>
                     </tr>

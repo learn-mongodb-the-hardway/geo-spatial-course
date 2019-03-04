@@ -9,11 +9,14 @@
     </header>
       
     <main role="main" class="container">
-      <section class="jumbotron text-left">
+			<section class="jumbotron text-left">
         <div class="container">
 				<% if (messages && messages.length == 1) { %>
 					<div class="alert alert-warning" id="error" role="alert"><%= messages[0] %></div>
 				<% } %>
+				<div class="alert alert-dark" role="alert">
+					Enter your username and password and click Log in to enter.
+				</div>
 				<form action="<%= url('login') %>" method="post" class="needs-validation" novalidate>
 						<div class="form-group">
 							<label>Username</label>

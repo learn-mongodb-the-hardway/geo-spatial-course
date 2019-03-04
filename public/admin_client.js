@@ -14,6 +14,14 @@ AdminClient.prototype.setup = function() {
   var mapDivId = self.options.mapDivId;
   var accessToken = self.options.accessToken;
 
+  // Set up some variables to track map size for
+  var bigmapheight = 600;
+  var smallmapheight = 400;
+  var mapbreakwidth = 600;
+  var highzoom = 8;
+  var lowzoom = 7;
+  var initzoom;
+
   // Unpack options
   var optionLocation = self.options.location
   var searchPubs = self.options.searchPubs;
@@ -31,8 +39,35 @@ AdminClient.prototype.setup = function() {
   // Create the mapbox view
   self.mymap = L.map(mapDivId).setView(initialCoordinates, 1);
 
+  //Set initial mapheight, based on the calculated width of the map container
+  if ($("#" + mapDivId).width() > mapbreakwidth) {
+    initzoom = highzoom;
+    $("#" + mapDivId).height(bigmapheight);
+  } else {
+    initzoom = lowzoom;
+    $("#" + mapDivId).height(smallmapheight);
+  };
+
+  // Invalidate the size of the map
+  self.mymap.invalidateSize();
+  //Use Leaflets resize event to set new map height and zoom level
+  self.mymap.on('resize', function(e) {
+    if (e.newSize.x < mapbreakwidth) {
+      self.mymap.setZoom(lowzoom);
+      $("#" + mapDivId).css('height', smallmapheight);
+      self.mymap.invalidateSize();
+    };
+    
+    if (e.newSize.x > mapbreakwidth) {
+      self.mymap.setZoom(highzoom);
+      $("#" + mapDivId).css('height', bigmapheight);
+      self.mymap.invalidateSize();
+    };
+  });
+
   // Set up the map
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + accessToken, {
+    zoom: initzoom,
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +

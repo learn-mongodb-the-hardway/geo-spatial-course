@@ -181,8 +181,19 @@ client.connect(async (err, client) => {
   //
   // Routes
   app.get("/", (req, res) => {
+    // Redirect to mobile view
+    if (isMobilePhone(req)) {
+      return res.redirect('/mobile');
+    }
+
+    // Render the main page
     res.render('index.ejs', { accessToken: accessToken });
   });
 });
+
+function isMobilePhone(req) {
+  return /mobile|iphone|ipod|android|blackberry|opera|mini|windows\sce|palm|smartphone|iemobile|ipad|android|android 3.0|xoom|sch-i800|playbook|tablet|kindle/i
+    .test(req.header('user-agent'));
+}
 
 module.exports = app;

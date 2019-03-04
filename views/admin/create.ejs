@@ -16,6 +16,9 @@
         <% if (Object.keys(errors).length == 1 && errors['error']) { %>
           <div class="alert alert-warning" id="error" role="alert"><%= errors['error'] %></div>
         <% } %>
+				<div class="alert alert-dark" role="alert">
+					Enter your full name, username. Then enter the password and repeat it in the confirm password field. Finally click the Create button to create a new user.
+				</div>
         <form action="<%= url('create') %>" method="post" class="needs-validation" novalidate>
           <div class="form-group">
             <label for="name">Name</label>

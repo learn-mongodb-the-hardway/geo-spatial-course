@@ -2,7 +2,7 @@
 <h3>Pub Crawl Details</h3>
 <% } else { %>
 <h3>Edit Pub Crawl Details</h3>
-<div id="mapid" style="width: 600px; height: 400px;"></div>
+<div id="mapid"></div>
 <% } %>
 
 <hr/>
@@ -13,6 +13,9 @@
 <% if (crawl._id == null) { %>
 <form action="<%= url('crawls/create') %>" method="post" class="needs-validation" novalidate>   
 <% } else { %>
+<div class="alert alert-dark" role="alert">
+  You can change the name, description, start date and end date of the pub crawl and click Update to save the changes.
+</div>
 <form action="<%= url(`crawls/update/${crawl._id}`) %>" method="post" class="needs-validation" novalidate>
 <% } %>
 <div class="form-group">
@@ -46,9 +49,9 @@
 <% if (crawl.location != null) { %>
 <div class="form-group">
   <label>Address</label>
-  <input type="text" class="form-control" value="<%= crawl.location['placeName'] %>" readonly/>
+  <input type="text" class="form-control" value="<%= crawl.location ? crawl.location['placeName'] : '' %>" readonly/>
   <label>GEO Coordinates</label>
-  <input type="text" class="form-control" value="[<%= crawl.location.polygon.coordinates %>]" readonly/>
+  <input type="text" class="form-control" value="[<%= crawl.location && crawl.location.polygon ? crawl.location.polygon.coordinates : '' %>]" readonly/>
   <label>Distance in meters</label>
   <input type="text" class="form-control" value="<%= crawl.locationDistance %>" readonly/>
 </div>

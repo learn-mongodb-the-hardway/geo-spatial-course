@@ -61,8 +61,8 @@ footer p {
   position: absolute;
   right: 10%;
   bottom: -30%;
-  width: 300px;
-  height: 540px;
+  width: 200px;
+  height: 340px;
   background-color: #333;
   border-radius: 21px;
   -webkit-transform: rotate(30deg);
