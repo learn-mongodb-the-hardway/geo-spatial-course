@@ -1,12 +1,8 @@
 const { MapBoxServices } = require('../../lib/mapbox');
-const { readFileSync } = require('fs');
+const { readAccessToken } = require('./utils');
 const assert = require('assert');
 // Check if env has been set
-var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
-
-if (accessToken == null) {
-  accessToken = readFileSync(`${__dirname}/../../token.txt`, 'utf8');
-}
+var accessToken = readAccessToken(`${__dirname}/../../token.txt`);
 
 describe("Map Box Tests", () => {
 
