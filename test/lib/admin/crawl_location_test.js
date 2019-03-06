@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const assert = require('assert');
 const ejs = require('ejs');
 const { MongoClient, ObjectId } = require('mongodb');
@@ -6,10 +5,9 @@ const { mockRequest, mockResponse } = require('mock-req-res')
 const { JSDOM } = require("jsdom");
 const { User } = require('../../../lib/models/user');
 const { Crawl } = require('../../../lib/models/crawl');
-const { waitOneTick } = require('../utils');
+const { waitOneTick, readAccessToken } = require('../utils');
 
 // Check if env has been set
-var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
 var databaseName = "geo-spatial-test";
 var url = "mongodb://localhost:27017";
 var client = null;
@@ -20,9 +18,8 @@ var crawl = null;
 // Routes
 const { locationSetGet, locationFindPost } = require('../../../lib/admin/routes/crawls/location');
 
-if (accessToken == null) {
-  accessToken = readFileSync(`${__dirname}/../../../token.txt`, 'utf8');
-}
+// Read the accessToken
+var accessToken = readAccessToken(`${__dirname}/../../../token.txt`);
 
 describe("/crawls/location Routes", () => {
   before(async () => {

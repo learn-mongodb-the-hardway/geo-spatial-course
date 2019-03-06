@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const assert = require('assert');
 const ejs = require('ejs');
 const { MongoClient, ObjectId } = require('mongodb');
@@ -10,7 +9,6 @@ const { JSDOM } = require("jsdom");
 const { waitOneTick } = require('../utils');
 
 // Check if env has been set
-var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
 var databaseName = "geo-spatial-test";
 var url = "mongodb://localhost:27017";
 var client = null;
@@ -24,10 +22,6 @@ const { locationPost } = require('../../../lib/mobile/routes/location');
 const { leaveGet } = require('../../../lib/mobile/routes/leave');
 const { joinGet, joinPost } = require('../../../lib/mobile/routes/join');
 const { loginPost } = require('../../../lib/mobile/routes/login');
-
-if (accessToken == null) {
-  accessToken = readFileSync(`${__dirname}/../../../token.txt`, 'utf8');
-}
 
 describe("Mobile Tests", () => {
   const pubId = ObjectId();
@@ -118,7 +112,9 @@ describe("Mobile Tests", () => {
 
             window.$ = function() {
               return {
-                on: function() {}
+                on: function() {},
+                hide: function() {},
+                show: function() {}
               }
             }
           }});

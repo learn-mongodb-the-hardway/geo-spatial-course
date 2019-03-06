@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const assert = require('assert');
 const ejs = require('ejs');
 const { MongoClient, ObjectId } = require('mongodb');
@@ -10,7 +9,6 @@ const moment = require('moment');
 const { waitOneTick } = require('../utils');
 
 // Check if env has been set
-var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
 var databaseName = "geo-spatial-test";
 var url = "mongodb://localhost:27017";
 var client = null;

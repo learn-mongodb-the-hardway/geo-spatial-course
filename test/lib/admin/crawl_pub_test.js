@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const assert = require('assert');
 const ejs = require('ejs');
 const { MongoClient, ObjectId } = require('mongodb');
@@ -8,10 +7,9 @@ const { User } = require('../../../lib/models/user');
 const { Pub } = require('../../../lib/models/pub');
 const { Crawl } = require('../../../lib/models/crawl');
 const { PostCode } = require('../../../lib/models/postcode');
-const { waitOneTick } = require('../utils');
+const { waitOneTick, readAccessToken } = require('../utils');
 
 // Check if env has been set
-var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
 var databaseName = "geo-spatial-test";
 var url = "mongodb://localhost:27017";
 var client = null;
@@ -21,12 +19,11 @@ var crawl = null;
 var pub = null;
 var postcode = null;
 
+// Read the accessToken
+var accessToken = readAccessToken(`${__dirname}/../../../token.txt`);
+
 // Routes
 const { pubAddPost, pubDeleteGet, pubFindPost, pubMoveupGet } = require('../../../lib/admin/routes/crawls/pub');
-
-if (accessToken == null) {
-  accessToken = readFileSync(`${__dirname}/../../../token.txt`, 'utf8');
-}
 
 describe("/crawls/pub Routes", () => {
   before(async () => {

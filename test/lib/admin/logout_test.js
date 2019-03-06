@@ -1,13 +1,8 @@
-const { readFileSync } = require('fs');
 const assert = require('assert');
-const ejs = require('ejs');
 const { MongoClient } = require('mongodb');
 const { mockRequest, mockResponse } = require('mock-req-res')
-const { JSDOM } = require("jsdom");
-const { waitOneTick } = require('../utils');
 
 // Check if env has been set
-var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
 var databaseName = "geo-spatial-test";
 var url = "mongodb://localhost:27017";
 var client = null;
@@ -15,10 +10,6 @@ var database = null;
 
 // Routes
 const { logoutGet } = require('../../../lib/admin/routes/logout');
-
-if (accessToken == null) {
-  accessToken = readFileSync(`${__dirname}/../../../token.txt`, 'utf8');
-}
 
 describe("Admin /logout Route", () => {
   before(async () => {

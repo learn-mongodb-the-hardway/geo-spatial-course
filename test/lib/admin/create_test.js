@@ -1,4 +1,3 @@
-const { readFileSync } = require('fs');
 const assert = require('assert');
 const ejs = require('ejs');
 const { MongoClient } = require('mongodb');
@@ -8,7 +7,6 @@ const { User } = require('../../../lib/models/user');
 const { waitOneTick } = require('../utils');
 
 // Check if env has been set
-var accessToken = process.env["MAPBOX_ACCESS_TOKEN"];
 var databaseName = "geo-spatial-test";
 var url = "mongodb://localhost:27017";
 var client = null;
@@ -17,10 +15,6 @@ var user = null;
 
 // Routes
 const { createGet, createPost } = require('../../../lib/admin/routes/create');
-
-if (accessToken == null) {
-  accessToken = readFileSync(`${__dirname}/../../../token.txt`, 'utf8');
-}
 
 describe("Admin /create Route", () => {
   before(async () => {
