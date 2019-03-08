@@ -6,7 +6,6 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const { Strategy } = require('passport-local');
-const crypto = require('crypto');
 const { hashPassword } = require('./lib/shared');
 
 // Grab all models
@@ -34,7 +33,6 @@ const accessToken = config.accessToken;
 const mongoURI = config.mongoURI;
 const databaseName = config.databaseName;
 const secret = config.secret;
-const port = config.port
 
 // Create session store
 const store = new MongoDBStore({
@@ -92,13 +90,6 @@ client.connect(async (err, client) => {
   executeAndSkipException(client.db(databaseName).collection('postcodes').createIndex({ geometry: "2dsphere" }));
   executeAndSkipException(client.db(databaseName).collection('crawls').createIndex({ "location.geometry": "2dsphere" }));
   executeAndSkipException(client.db(databaseName).collection('crawls').createIndex({ "location.polygon": "2dsphere" }));
-
-  // Global options
-  const globalOptions = {
-    accessToken: accessToken,
-    db: client.db(databaseName),
-    secret: secret
-  }
 
   // Get the user collection
   const users = client.db(databaseName).collection('users');
