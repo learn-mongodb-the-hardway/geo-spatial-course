@@ -103,6 +103,8 @@ describe("/crawls/pub Routes", () => {
       // Execute the indexGet
       await pubAddPost(req, res)
       await waitOneTick();
+      await waitOneTick();
+      await waitOneTick();
 
       // Assertions
       assert.notEqual(null, doc.window.document.querySelector("#pubInCrawlTable"));
