@@ -117,7 +117,7 @@ describe("Admin /create Route", () => {
       await waitOneTick();
 
       // Do assertions
-      const doc = await user.findByUsername('petrus');
+      const doc = await user.findOneByUsername('petrus');
       assert.equal('petrus', doc.name);
       assert.equal('petrus', doc.username);
       assert(doc.password);

@@ -1,11 +1,6 @@
 const assert = require('assert');
-const ejs = require('ejs');
 const { MongoClient, ObjectId } = require('mongodb');
-const { mockRequest, mockResponse } = require('mock-req-res')
-const { JSDOM } = require("jsdom");
 const { User } = require('../../../lib/models/user');
-const moment = require('moment');
-const { waitOneTick } = require('../utils');
 
 // Check if env has been set
 var databaseName = "geo-spatial-test";
@@ -13,9 +8,6 @@ var url = "mongodb://localhost:27017";
 var client = null;
 var database = null;
 var user = null;
-
-// Routes
-const { changePasswordGet, changePasswordPost } = require('../../../lib/admin/routes/change_password');
 
 describe("User Model", () => {
   before(async () => {
@@ -237,7 +229,7 @@ describe("User Model", () => {
       assert.equal(0, Object.keys(errors).length);
 
       // Get the document
-      const doc = await user.findByUsername('peter120');
+      const doc = await user.findOneByUsername('peter120');
 
       assert.notEqual(null, doc);
       assert.equal('peter120', doc.username);

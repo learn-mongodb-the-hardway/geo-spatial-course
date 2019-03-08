@@ -464,7 +464,7 @@ describe("Mobile Tests", () => {
         await joinPost(req, res)
 
         // Grab the docs
-        const attendantDoc = await user.findByUsername("integration_peter");
+        const attendantDoc = await user.findOneByUsername("integration_peter");
         const crawlDoc = await crawl.findById(crawlId);
 
         // Assert redirect
