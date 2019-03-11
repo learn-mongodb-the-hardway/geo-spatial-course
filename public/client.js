@@ -305,7 +305,11 @@ function mobileSetup(options) {
       parseJSON: false
     }, function (err, result) {
       if (err) return console.log(err);
-      setDiv('crawls', result);
+      setDiv('crawls', result); // Refresh view
+
+      setTimeout(function () {
+        mobileSetup(options);
+      }, 3000);
     });
   });
 }
