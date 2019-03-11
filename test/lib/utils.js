@@ -18,4 +18,10 @@ function readAccessToken(tokenFile) {
   return (accessToken || '').trim();
 }
 
-module.exports = { waitOneTick, readAccessToken };
+function doesNotContainFields(doc, fields) {
+  return fields.filter(field => {
+    return doc[field] == null;
+  });
+};
+
+module.exports = { waitOneTick, readAccessToken, doesNotContainFields };

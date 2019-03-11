@@ -246,7 +246,7 @@ describe("Mobile Tests", () => {
         // At our current attendant to the crawl
         await crawl.addAttendant(crawlId, attendantId);
         // Add the attendant to a specific pub
-        await crawl.addAttendantToPub(crawlId, secondPubId, attendantId);
+        await crawl.addAttendant(crawlId, attendantId, [secondPubId]);
 
         // Create mock req/res
         const req = mockRequest({ db: database, models: { crawl, user, pub }, body: {
@@ -301,7 +301,7 @@ describe("Mobile Tests", () => {
         // At our current attendant to the crawl
         await crawl.addAttendant(crawlId, attendantId);
         // Add the attendant to a specific pub
-        await crawl.addAttendantToPub(crawlId, secondPubId, attendantId);
+        await crawl.addUserToPubs(crawlId, attendantId, [secondPubId]);
 
         // Create mock req/res
         const req = mockRequest({ db: database, models: { crawl, user, pub }, baseUrl: '/', session: {
