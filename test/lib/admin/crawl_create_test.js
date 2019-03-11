@@ -111,12 +111,13 @@ describe("/crawls/create Routes", () => {
       var doc = null;
       // Use an object id as username and user id
       const username = ObjectId().toString();
+      const currentTime = new Date().getTime();
 
       // Prepare the mock request
       const req = mockRequest({ db: database, models: { crawl }, params: {}, body: {
         name: 'My test crawl', description: 'My test crawl',
-        fromdate: moment(new Date()).format('HH:mm MM/DD/YYYY'),
-        todate: moment(new Date()).format('HH:mm MM/DD/YYYY')
+        fromdate: moment(new Date(currentTime)).format('HH:mm MM/DD/YYYY'),
+        todate: moment(new Date(currentTime + 200000)).format('HH:mm MM/DD/YYYY')
       }, session: {}, options: {}, baseUrl: '/admin', user: {
         username: username
       }})

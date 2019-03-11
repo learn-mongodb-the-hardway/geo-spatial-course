@@ -63,7 +63,7 @@ describe("/crawls/location Routes", () => {
       // Assertions
       assert.equal(1, doc.window.document.querySelectorAll("tbody tr").length);
 
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
       assert(doc);
       assert.equal(true, doc.published);  
     });

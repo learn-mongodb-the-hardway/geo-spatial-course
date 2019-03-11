@@ -83,7 +83,7 @@ describe("/crawls/location Routes", () => {
       // Do assertions
       assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.location)
@@ -168,7 +168,7 @@ describe("/crawls/location Routes", () => {
       assert.notEqual(null, doc.window.document.querySelector("#pubSearchTable"));
 
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.searchLocations)

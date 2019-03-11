@@ -266,7 +266,7 @@ describe("Mobile Tests", () => {
 
         // Grab the docs
         const attendantDoc = await user.findById(attendantId);
-        const crawlDoc = await crawl.findById(crawlId);
+        const crawlDoc = await crawl.findOneById(crawlId);
 
         // Assertions
         assert.deepEqual({
@@ -318,7 +318,7 @@ describe("Mobile Tests", () => {
         await leaveGet(req, res)
 
         // Grab docs
-        const crawlDoc = await crawl.findById(crawlId);
+        const crawlDoc = await crawl.findOneById(crawlId);
 
         // Assertions
         assert(logoutCalled);
@@ -406,7 +406,7 @@ describe("Mobile Tests", () => {
         await joinGet(req, res)
 
         // Grab docs
-        const crawlDoc = await crawl.findById(crawlId);
+        const crawlDoc = await crawl.findOneById(crawlId);
 
         // Assertions
         assert.equal('/', result);
@@ -465,7 +465,7 @@ describe("Mobile Tests", () => {
 
         // Grab the docs
         const attendantDoc = await user.findOneByUsername("integration_peter");
-        const crawlDoc = await crawl.findById(crawlId);
+        const crawlDoc = await crawl.findOneById(crawlId);
 
         // Assert redirect
         assert.equal('/', result);

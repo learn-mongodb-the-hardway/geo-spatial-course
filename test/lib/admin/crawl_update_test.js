@@ -42,16 +42,18 @@ describe("/crawls/location Routes", () => {
     it('successfully update pub crawl', async () => {
       const crawlId = ObjectId();
       var doc = null;
+      const time = new Date().getTime();
+
       // Create a new pub crawl
-      await crawl.create(crawlId, "Crawl 1", "Crawl Description", crawlId.toString(), new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {});
+      await crawl.create(crawlId, "Crawl 1", "Crawl Description", crawlId.toString(), new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 200000), true, [], {});
 
       // Prepare the mock request
       const req = mockRequest({ db: database, models: { crawl }, params: {
         crawlId: crawlId
       }, body: {
         name: 'Crawl 2', description: 'Crawl 2 Description',
-        fromdate: moment(new Date()).format('HH:mm MM/DD/YYYY'),
-        todate: moment(new Date()).format('HH:mm MM/DD/YYYY')
+        fromdate: moment(new Date(time)).format('HH:mm MM/DD/YYYY'),
+        todate: moment(new Date(time + 2000000)).format('HH:mm MM/DD/YYYY')
       }, session: {}, options: {}, user: {
         username: "peter"
       }, baseUrl: '/admin'})
@@ -91,13 +93,12 @@ describe("/crawls/location Routes", () => {
 
       // Prepare the mock request
       const req = mockRequest({ db: database, models: { crawl }, params: {
-        crawlId: crawlId
+        crawlId: ObjectId()
       }, body: {}, session: {}, options: {}, user: {
         username: crawlId.toString()
       }, baseUrl: '/admin'})
-      const res = mockResponse({ render: async function(template, object) {
-        const result = await ejs.renderFile(`views/${template}`, object || {});
-        doc = new JSDOM(result);
+      const res = mockResponse({ redirect: async function(url) {
+        doc = url;
       }});
 
       // Execute the indexGet
@@ -105,10 +106,7 @@ describe("/crawls/location Routes", () => {
       await waitOneTick();
 
       // Assertions
-      assert.equal(true, doc.window.document.querySelector("#name").classList.contains('is-invalid'));
-      assert.equal(true, doc.window.document.querySelector("#description").classList.contains('is-invalid'));
-      assert.equal(true, doc.window.document.querySelector("#fromdate").classList.contains('is-invalid'));
-      assert.equal(true, doc.window.document.querySelector("#todate").classList.contains('is-invalid'));
+      assert.notEqual(-1, doc.indexOf('/error?error=could%20not%20locate'));
     });
 
     it('missing fields', async () => {

@@ -6,7 +6,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const { Strategy } = require('passport-local');
-const { hashPassword } = require('./lib/shared');
+const { hashPassword, executeAndSkipException } = require('./lib/shared');
 
 // Grab all models
 const { User } = require('./lib/models/user');
@@ -74,12 +74,6 @@ const admin = require('./lib/admin/index');
 store.on('error', error => {
   console.err(error);
 });
-
-async function executeAndSkipException(func) {
-  try {
-    await func();
-  } catch (err) {}
-}
 
 // Connect to the database
 client.connect(async (err, client) => {

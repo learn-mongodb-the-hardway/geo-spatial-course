@@ -112,7 +112,7 @@ describe("/crawls/pub Routes", () => {
       assert(doc.serialize().indexOf('/admin/crawls/pub/delete') != -1)
 
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.pubs)
@@ -152,7 +152,7 @@ describe("/crawls/pub Routes", () => {
       assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.pubs)
@@ -187,7 +187,7 @@ describe("/crawls/pub Routes", () => {
       assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.pubs)
@@ -231,7 +231,7 @@ describe("/crawls/pub Routes", () => {
       assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.pubs)
@@ -272,7 +272,7 @@ describe("/crawls/pub Routes", () => {
       assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.pubs)
@@ -313,7 +313,7 @@ describe("/crawls/pub Routes", () => {
       assert.notEqual(null, doc.window.document.querySelector("#startLocationAddress"));
 
       // Locate the crawl
-      doc = await crawl.findById(crawlId);
+      doc = await crawl.findOneById(crawlId);
 
       // Assertions
       assert(doc.pubs)
