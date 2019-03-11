@@ -10,6 +10,9 @@
 <div class="alert alert-dark" role="alert">
   Set the pub crawl starting address and the size of the starting circle in meters from the address.
 </div>
+<% if (Object.keys(errors).length == 1 && errors['error_set_location']) { %>
+<div class="alert alert-warning" id="error_set_location" role="alert"><%= errors['error_set_location'] %></div>
+<% } %>
 <form action="<%= url(`crawls/location/find/${crawl._id}`) %>" method="post">
   <div class="form-group row">
     <label for="startLocationAddress" class="col-sm-2 col-form-label">Address</label>

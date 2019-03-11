@@ -111,15 +111,30 @@ describe("/crawls/location Routes", () => {
       }, body: {}, session: {}, options: {
         accessToken: accessToken
       }, baseUrl: '/admin'})
-      const res = mockResponse({ redirect: async function(url) {
-        result = url;
+      const res = mockResponse({ render: async function(template, object) {
+        const result = await ejs.renderFile(`views/${template}`, object || {});
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          window.$ = function() {
+            return {
+              datetimepicker: function() {},
+              on: function() {}
+            }
+          }        
+
+          window.AdminClient = function() {
+            return {
+              setup: function() {}
+            }
+          }
+        }});
       }});
 
       // Execute the indexGet
       await locationFindPost(req, res)
+      await waitOneTick();
 
-      // Assertions
-      assert(result.indexOf('/error?error=') != -1);
+      // Do assertions
+      assert.notEqual(null, doc.window.document.querySelector("#error_set_location"));
     });
 
     it('correctly set search pubs', async () => {
