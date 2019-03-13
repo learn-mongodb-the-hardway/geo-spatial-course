@@ -8,7 +8,7 @@
     "stop": "pm2 stop pub-crawl",
     "restart": "pm2 restart all",
     "lint": "eslint .",
-    "gulp": "gulp",
+    "bundle": "browserify lib/frontend/index.js -o ./public/client.js",
     "test": "mocha ./test/**/*"
   },
   "author": "Christian Kvalheim",
@@ -32,13 +32,9 @@
     "pm2": "^3.3.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
+    "browserify": "^16.2.3",
     "chai": "^4.2.0",
     "gulp": "^4.0.0",
-    "gulp-babel": "^8.0.0",
-    "gulp-concat": "^2.6.1",
-    "gulp-sourcemaps": "^2.6.5",
     "jsdom": "^13.2.0",
     "mocha": "^5.2.0",
     "mock-req-res": "^1.0.3",
