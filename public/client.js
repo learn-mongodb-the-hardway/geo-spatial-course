@@ -80,6 +80,7 @@ AdminClient.prototype.setup = function() {
     }
   });
 
+  // Handle any error
   this.location.on('error', function(err) {
     if (err) {
       if (typeof console != 'undefined') console.log(err);
@@ -89,10 +90,6 @@ AdminClient.prototype.setup = function() {
 
   // Get current location
   this.location.location();
-
-  // // Get the current location
-  // getGeoLocation(function(err, location) {
-  // });
 }
 
 function addPub(marker) {
@@ -158,6 +155,9 @@ var Leaflet = function(mapDivId, accessToken, options) {
   this.mapDivId = mapDivId;
   this.accessToken = accessToken;
   this.options = options || {};
+
+  // Current location
+  this.currentLocation = null;
 }
 
 Leaflet.prototype.init = function() {
@@ -193,8 +193,6 @@ Leaflet.prototype.init = function() {
     $(mapDivName).height(smallmapheight);
   };
 
-  // Invalidate the size of the map
-  this.mymap.invalidateSize();
   //Use Leaflets resize event to set new map height and zoom level
   this.mymap.on('resize', function(e) {
     if (e.newSize.x < mapbreakwidth) {
@@ -210,20 +208,44 @@ Leaflet.prototype.init = function() {
     };
   });
 
+  // Invalidate the size of the map
+  this.invalidateSize();
+
   // Set up the map
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + this.accessToken, {
-    zoom: initzoom,
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
       'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     id: 'mapbox.streets'
   }).addTo(this.mymap);
+
+  // Set the default zoom
+  this.mymap.setZoom(initzoom);
+}
+
+Leaflet.prototype.getZoom = function() {
+  return this.mymap.getZoom();
 }
 
 Leaflet.prototype.center = function(latitude, longitude, zoom) {
   zoom = zoom || this.mymap.getZoom();
   this.mymap.setView([latitude, longitude], zoom);
+}
+
+Leaflet.prototype.centerFlyTo = function(latitude, longitude, zoom) {
+  zoom = zoom || this.mymap.getZoom();
+  this.mymap.flyTo([latitude, longitude], zoom);
+}
+
+Leaflet.prototype.setCurrentLocationMarker = function(latitude, longitude, accuracy) {
+  if (!this.currentLocation) {
+    this.currentLocation = L.marker([latitude, longitude]);
+    this.currentLocation.addTo(this.mymap);
+  }
+
+  // Set the current location
+  this.currentLocation.setLatLng(L.latLng([latitude, longitude]));
 }
 
 Leaflet.prototype.addPointMarkerAndCircle = function(latitude, longitude, radius, tooltip) {
@@ -235,13 +257,17 @@ Leaflet.prototype.addPointMarkerAndCircle = function(latitude, longitude, radius
   layer.bindTooltip(tooltip);
   layer.addTo(this.mymap);
 
-  // Create circle
-  L.circle([latitude, longitude], {
+  // Create circle and return
+  return L.circle([latitude, longitude], {
     color: 'red',
     fillColor: '#f03',
     fillOpacity: 0.5,
     radius: radius
   }).addTo(this.mymap);
+}
+
+Leaflet.prototype.invalidateSize = function() {
+  this.mymap.invalidateSize();
 }
 
 Leaflet.prototype.addMarkers = function(markers, callback, options) {
@@ -290,14 +316,18 @@ Leaflet.prototype.moveToLocation = function(entries) {
 
 module.exports = { Leaflet };
 },{}],5:[function(require,module,exports){
-const { setDiv, getJSON, postJSON, getGeoLocation } = require('./shared');
+const { setDiv, getJSON, postJSON } = require('./shared');
+const { GeoLocation } = require('./geo_location');
+const { Leaflet } = require('./leaflet');
 
 var PubCrawlClient = function(options) {
   this.mymap = null;
   this.currentLocation = null;
-  this.currentLocationMarker = null;
   this.intervalId = null;
   this.options = options;
+
+  // Geo location object
+  this.locationFactory = GeoLocation;
   
   // current look up pub index
   this.nextPubIndex = 0;
@@ -306,79 +336,83 @@ var PubCrawlClient = function(options) {
 PubCrawlClient.prototype.setup = function(callback) {
   var self = this;
 
-  getGeoLocation(function(err, location) {
-    if (err) {
-      if (typeof console != 'undefined') console.log(err);
-      return alert("Please Enable Location Support, and reload the page");
-    }
+  // Create a leaflet container
+  this.leaflet = new Leaflet(
+    self.options.mapDivId, self.options.accessToken);
 
+  // Initialize
+  this.leaflet.init();
+
+  // Geo Call
+  var location = new this.locationFactory();
+
+  // Get the current location
+  location.on('location', function(location) {
     // Unpack fields
     self.pubs = self.options.pubCrawl && self.options.pubCrawl.pubs
       ? self.options.pubCrawl.pubs
       : [];
 
     // Save the current location
-    self.currentLocation = [location.latitude, location.longitude];
-    // Create the mapbox view
-    self.mymap = L.map(self.options.mapDivId).setView(self.currentLocation, 18);
-    // Set up the map
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + self.options.accessToken, {
-      maxZoom: 18,
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-      id: 'mapbox.streets'
-    }).addTo(self.mymap);
+    self.currentLocation = [location.coords.latitude, location.coords.longitude];
 
-    // Create the current marker
-    self.currentLocationMarker = L.marker(self.currentLocation);
-    self.currentLocationMarker.addTo(self.mymap);
-
-    // Render all the pub crawl pubs
-    self.pubs.forEach(function(pub, index) {
-      var markerOptions = {
-        radius: 12, fillColor: "green", color: "#000",
-        weight: 1, opacity: 1, fillOpacity: 0.8      
+    // Map the crawl pubs
+    // Add the markers to the leaflet
+    self.leaflet.addMarkers(self.pubs.map(function(pub) {
+      return {
+        name: pub.name,
+        geometry: pub.geometry
       }
-
-      L.geoJSON(pub.geometry, {
-        pointToLayer: function(feature, latlng) {
-          return L.circleMarker(latlng, markerOptions);
-        },
-        onEachFeature: function(feature, layer) {
-          layer.bindTooltip("" + index + ". " + pub.name);
-        }
-      }).addTo(self.mymap);
-    });
+    }));
 
     // Invalidate size
-    self.invalidateSize();
+    self.leaflet.invalidateSize();
 
-    // Update the attendant lcoation
+    // Center the current location
+    self.leaflet.center(self.currentLocation[0], self.currentLocation[1]);
+
+    // Update the attendant location
     updateAttendantLocation(self.currentLocation);
 
     // Start current location update
     self.intervalId = setInterval(updateLocation(self), 1000);
   });
+
+  // Handle any error
+  location.on('error', function(err) {
+    if (err) {
+      if (typeof console != 'undefined') console.log(err);
+      return alert("Please Enable Location Support, and reload the page");
+    }
+  });
+
+  // Trigger location lookup
+  location.location();
 }
 
 function updateLocation(self) {
   return function() {
-    getGeoLocation(function(err, location) {
-      if (err) return;
+    // Geo Call
+    var location = new self.locationFactory();
+
+    // Get the current location
+    location.on('location', function(location) {
       // Skip everything if the location is the same
       if (location.latitude == self.currentLocation[0]
-          && location.longitude == self.currentLocation[1]) {
-            return;
-          }
+        && location.longitude == self.currentLocation[1]) {
+          return;
+      }
 
       // Save the current location
-      self.currentLocation = [location.latitude, location.longitude];
+      self.currentLocation = [location.coords.latitude, location.coords.longitude];
       // Update the current marker location
-      self.currentLocationMarker.setLatLng(L.latLng(self.currentLocation));
-      // Update the attendant lcoation
+      self.leaflet.setCurrentLocationMarker(self.currentLocation[0], self.currentLocation[1]);
+      // Update the attendant location
       updateAttendantLocation(self.currentLocation);
-    });  
+    });
+
+    // Trigger location lookup
+    location.location();
   }
 }
 
@@ -387,12 +421,6 @@ function updateAttendantLocation(coordinates) {
     latitude: coordinates[0],
     longitude: coordinates[1]
   }, { parseJSON: false }, function(err, result) {});
-}
-
-PubCrawlClient.prototype.invalidateSize = function() {
-  if (this.mymap) {
-    this.mymap.invalidateSize();
-  }
 }
 
 PubCrawlClient.prototype.loadAttendants = function(id, callback) {
@@ -414,10 +442,15 @@ PubCrawlClient.prototype.centerNextPub = function() {
   if (this.pubs.length) {
     // Get this or next index
     var pubIndex = this.nextPubIndex++ % this.pubs.length;
+    
     // Get the next pub
     var pub = this.pubs[pubIndex];
-    // Center the map on the pub
-    this.mymap.flyTo(extractPubPoint(pub), this.mymap.getZoom());
+
+    // Get the coordinates
+    var coords = extractPubPoint(pub);
+
+    // // Center the map on the pub
+    this.leaflet.centerFlyTo(coords[0], coords[1], this.leaflet.getZoom());
   }    
 }
 
@@ -433,15 +466,15 @@ function extractPubPoint(pub) {
       pub.geometry.coordinates[0][0][0]];
   }
 
-  return L.latLng(coordinates);
+  return coordinates;
 }
 
 PubCrawlClient.prototype.center = function() {
   if (this.currentLocation) {
-    // Update the marker with the current location
-    this.currentLocationMarker.setLatLng(this.currentLocation);    
-    // Center the map on the current location marker
-    this.mymap.setView(this.currentLocationMarker.getLatLng(),this.mymap.getZoom()); 
+    // Update the market
+    this.leaflet.setCurrentLocationMarker(this.currentLocation[0], this.currentLocation[1]);
+    // Center the map
+    this.leaflet.center(this.currentLocation[0], this.currentLocation[1]);
   }
 }
 
@@ -461,7 +494,7 @@ function mobileSetup(options) {
 }
 
 module.exports = { PubCrawlClient, mobileSetup }
-},{"./shared":6}],6:[function(require,module,exports){
+},{"./geo_location":2,"./leaflet":4,"./shared":6}],6:[function(require,module,exports){
 class Location {
   constructor(doc) {
     this.timestamp = doc.timestamp;
