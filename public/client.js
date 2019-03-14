@@ -213,15 +213,13 @@ Leaflet.prototype.init = function() {
 
   // Set up the map
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + this.accessToken, {
+    zoom: initzoom,
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
       'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     id: 'mapbox.streets'
   }).addTo(this.mymap);
-
-  // Set the default zoom
-  this.mymap.setZoom(initzoom);
 }
 
 Leaflet.prototype.getZoom = function() {
@@ -338,7 +336,11 @@ PubCrawlClient.prototype.setup = function(callback) {
 
   // Create a leaflet container
   this.leaflet = new Leaflet(
-    self.options.mapDivId, self.options.accessToken);
+    self.options.mapDivId, 
+    self.options.accessToken, {
+      highzoom: 16,
+      lowzoom: 16
+    });
 
   // Initialize
   this.leaflet.init();
@@ -367,6 +369,9 @@ PubCrawlClient.prototype.setup = function(callback) {
 
     // Invalidate size
     self.leaflet.invalidateSize();
+
+    // Set the current marker position
+    self.leaflet.setCurrentLocationMarker(self.currentLocation[0], self.currentLocation[1]);
 
     // Center the current location
     self.leaflet.center(self.currentLocation[0], self.currentLocation[1]);
@@ -479,9 +484,16 @@ PubCrawlClient.prototype.center = function() {
 }
 
 function mobileSetup(options) {
-  getGeoLocation((err, location) => {
+  var location = new GeoLocation();
+
+  // Wait for the location
+  location.on('location', function(location) {
     // Get any pub crawls in your area
-    postJSON('/mobile', location, { parseJSON: false }, function(err, result) {
+    postJSON('/mobile', {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      timestamp: location.timestamp
+    }, { parseJSON: false }, function(err, result) {
       if (err) return console.log(err);
       setDiv('crawls', result);
 
@@ -491,61 +503,13 @@ function mobileSetup(options) {
       }, 3000);
     });
   });
+
+  // Trigger get location
+  location.location();
 }
 
 module.exports = { PubCrawlClient, mobileSetup }
 },{"./geo_location":2,"./leaflet":4,"./shared":6}],6:[function(require,module,exports){
-class Location {
-  constructor(doc) {
-    this.timestamp = doc.timestamp;
-    this.latitude = doc.latitude;
-    this.longitude = doc.longitude;
-    this.accuracy = doc.accuracy;
-    this.altitude = doc.altitude;
-    this.altitudeAccuracy = doc.altitudeAccuracy;
-    this.speed = doc.speed;
-  }
-
-  toArray() {
-    return [this.latitude, this.longitude];
-  }
-
-  equals(obj) {
-    if (obj == null) return false;
-    if (obj.latitude != this.latitude) return false;
-    if (obj.longitude != this.longitude) return false;
-    return true;
-  }
-}
-
-function getGeoLocation(callback, options) {
-  options = options || {
-    enableHighAccuracy: false,
-    maximumAge: 1000 * 60,
-    timeout: 1000 * 10
-  };
-
-  var geoSuccess = function(position) {
-    var location = new Location({
-      accuracy: position.coords.accuracy,
-      altitude: position.coords.altitude,
-      altitudeAccuracy: position.coords.altitudeAccuracy,
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      speed: position.coords.speed,
-      timestamp: position.timestamp
-    });
-
-    callback(null, location);
-  }
-
-  var geoError = function(error) {
-    callback(error);
-  }
-
-  navigator.geolocation.getCurrentPosition(geoSuccess, geoError, options);
-}
-
 /**
  * Simple AJAX POST method
  */
@@ -594,5 +558,5 @@ function setDiv(id, text) {
   document.getElementById(id).innerHTML = text;
 }
 
-module.exports = { Location, setDiv, getJSON, postJSON, getGeoLocation }
+module.exports = { setDiv, getJSON, postJSON };
 },{}]},{},[3]);
