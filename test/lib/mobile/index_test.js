@@ -73,6 +73,10 @@ describe("Mobile Tests", () => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
+
+            window.BrowserInteractions = () => {}
+
+            window.Leaflet = function() {}
           }});
         }});
 
@@ -109,6 +113,12 @@ describe("Mobile Tests", () => {
                 setup: function() {}
               }
             }
+
+            window.Leaflet = function() {}
+
+            window.GeoLocation = function() {}
+
+            window.BrowserInteractions = function() {}
 
             window.$ = function() {
               return {

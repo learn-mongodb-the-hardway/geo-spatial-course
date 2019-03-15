@@ -29,11 +29,27 @@
   </footer>
 
   <script>
+    // Variables
+    var mapDivId = 'mapid';
+    var accessToken = '<%= options.accessToken %>';
+    var pubCrawl = <%- JSON.stringify(doc) %>
+
+    // Leaflet instance
+    var leaflet = new Leaflet(
+      mapDivId, 
+      accessToken, {
+        highzoom: 16,
+        lowzoom: 16
+    });    
+
+    // Handles all browser interactions
+    var browser = new BrowserInteractions();
+
     // Create pub crawl client
-    var pubcrawlClient = new PubCrawlClient({
-      mapDivId: 'mapid',
-      accessToken: '<%= options.accessToken %>',
-      pubCrawl: <%- JSON.stringify(doc) %>
+    var pubcrawlClient = new PubCrawlClient(leaflet, GeoLocation, browser, {
+      mapDivId: mapDivId,
+      accessToken: accessToken,
+      pubCrawl: pubCrawl
     });
 
     // Peform the setup

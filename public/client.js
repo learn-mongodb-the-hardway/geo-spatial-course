@@ -1,5 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const { setDiv, postJSON } = require('./shared');
+const { BrowserInteractions } = require('./shared');
 
 var AdminClient = function(leaflet, location, options) {
   this.mymap = null;
@@ -23,7 +23,7 @@ AdminClient.prototype.setup = function() {
   // Get the current location
   this.location.on('location', function(location) {
     // Centering location
-    var centeringLocation = [location.latitude, location.longitude];
+    var centeringLocation = [location.coords.latitude, location.coords.longitude];
 
     // Location is defined, draw on the map
     if (optionLocation && optionLocation.center) {
@@ -66,7 +66,7 @@ AdminClient.prototype.setup = function() {
         geometry: pub.geometry
       }
     }));
-    
+
     // If we have some pubs move to them
     if (searchPubs.length) {
       self.leaflet.moveToLocation(searchPubs.map(function(pub) {
@@ -87,9 +87,10 @@ AdminClient.prototype.setup = function() {
   this.location.location();
 }
 
-function addPub(marker) {
+function addPub(marker, browser) {
+  browser = browser || new BrowserInteractions();
   // Post the pub id
-  postJSON(marker.url + "/add/" + marker.id, {
+  browser.postJSON(marker.url + "/add/" + marker.id, {
     _id: marker._id
   }, { parseJSON: false }, function(err, result) {
     if (err) {
@@ -97,7 +98,7 @@ function addPub(marker) {
     }
 
     // We have the list of pubs
-    setDiv("pubs", result);
+    browser.setDiv("pubs", result);
   });
 }
 
@@ -141,6 +142,7 @@ const {AdminClient, addPub } = require('./admin_client');
 const { PubCrawlClient, mobileSetup } = require('./mobile_client');
 const { Leaflet } = require('./leaflet');
 const { GeoLocation } = require('./geo_location');
+const { BrowserInteractions } = require('./shared');
 
 // Map the classes to the window global object
 window.AdminClient = AdminClient;
@@ -149,7 +151,8 @@ window.PubCrawlClient = PubCrawlClient;
 window.mobileSetup = mobileSetup;
 window.Leaflet = Leaflet;
 window.GeoLocation = GeoLocation;
-},{"./admin_client":1,"./geo_location":2,"./leaflet":4,"./mobile_client":5}],4:[function(require,module,exports){
+window.BrowserInteractions = BrowserInteractions;
+},{"./admin_client":1,"./geo_location":2,"./leaflet":4,"./mobile_client":5,"./shared":6}],4:[function(require,module,exports){
 var Leaflet = function(mapDivId, accessToken, options) {
   this.mapDivId = mapDivId;
   this.accessToken = accessToken;
@@ -313,33 +316,33 @@ Leaflet.prototype.moveToLocation = function(entries) {
 
 module.exports = { Leaflet };
 },{}],5:[function(require,module,exports){
-const { setDiv, getJSON, postJSON } = require('./shared');
+const { BrowserInteractions } = require('./shared');
 const { GeoLocation } = require('./geo_location');
-const { Leaflet } = require('./leaflet');
 
-var PubCrawlClient = function(options) {
+var PubCrawlClient = function(
+  leaflet, 
+  locationFactory, 
+  browserInteractions,
+  options
+) {
   this.mymap = null;
   this.currentLocation = null;
   this.intervalId = null;
   this.options = options;
 
   // Geo location object
-  this.locationFactory = GeoLocation;
+  this.leaflet = leaflet;
+  this.locationFactory = locationFactory;
   
   // current look up pub index
   this.nextPubIndex = 0;
+
+  // Set the browser interaction handler
+  this.browserInteractions = browserInteractions;
 }
 
-PubCrawlClient.prototype.setup = function(callback) {
+PubCrawlClient.prototype.setup = function() {
   var self = this;
-
-  // Create a leaflet container
-  this.leaflet = new Leaflet(
-    self.options.mapDivId, 
-    self.options.accessToken, {
-      highzoom: 16,
-      lowzoom: 16
-    });
 
   // Initialize
   this.leaflet.init();
@@ -376,7 +379,7 @@ PubCrawlClient.prototype.setup = function(callback) {
     self.leaflet.center(self.currentLocation[0], self.currentLocation[1]);
 
     // Update the attendant location
-    updateAttendantLocation(self.currentLocation);
+    updateAttendantLocation(self, self.currentLocation);
 
     // Start current location update
     self.intervalId = setInterval(updateLocation(self), 1000);
@@ -412,7 +415,7 @@ function updateLocation(self) {
       // Update the current marker location
       self.leaflet.setCurrentLocationMarker(self.currentLocation[0], self.currentLocation[1]);
       // Update the attendant location
-      updateAttendantLocation(self.currentLocation);
+      updateAttendantLocation(self, self.currentLocation);
     });
 
     // Trigger location lookup
@@ -420,23 +423,24 @@ function updateLocation(self) {
   }
 }
 
-function updateAttendantLocation(coordinates) {
-  postJSON('/mobile/location', {
+function updateAttendantLocation(self, coordinates) {
+  self.browserInteractions.postJSON('/mobile/location', {
     latitude: coordinates[0],
     longitude: coordinates[1]
   }, { parseJSON: false }, function(err, result) {});
 }
 
 PubCrawlClient.prototype.loadAttendants = function(id, callback) {
+  var self = this;
   // Unpack crawlId
   var crawlId = this.options.pubCrawl && this.options.pubCrawl._id
     ? this.options.pubCrawl._id
     : null;
 
-  getJSON('/mobile/attendants/' + crawlId, 
+  this.browserInteractions.getJSON('/mobile/attendants/' + crawlId, 
     { parseJSON: false}, function(err, result) {
       if (err) return alert(err);
-      setDiv(id, result);
+      self.browserInteractions.setDiv(id, result);
 
       if (callback) callback(err, result);
     });
@@ -482,22 +486,23 @@ PubCrawlClient.prototype.center = function() {
   }
 }
 
-function mobileSetup(options) {
-  var location = new GeoLocation();
-
+function mobileSetup(options, browser, location) {
+  browser = browser || new BrowserInteractions();
+  // Set a new geo location instance
+  var location = location || new GeoLocation();
   // Wait for the location
   location.on('location', function(location) {
     // Get any pub crawls in your area
-    postJSON('/mobile', {
+    browser.postJSON('/mobile', {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       timestamp: location.timestamp
     }, { parseJSON: false }, function(err, result) {
       if (err) return console.log(err);
-      setDiv('crawls', result);
+      browser.setDiv('crawls', result);
 
       // Refresh view
-      setTimeout(function() {
+      browser.setTimeout(function() {
         mobileSetup(options);
       }, 3000);
     });
@@ -508,11 +513,13 @@ function mobileSetup(options) {
 }
 
 module.exports = { PubCrawlClient, mobileSetup }
-},{"./geo_location":2,"./leaflet":4,"./shared":6}],6:[function(require,module,exports){
+},{"./geo_location":2,"./shared":6}],6:[function(require,module,exports){
+var BrowserInteractions = function() {}
+
 /**
  * Simple AJAX POST method
  */
-function postJSON(url, object, options, callback) {
+BrowserInteractions.prototype.postJSON = function(url, object, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   
   var xhr = new XMLHttpRequest();
@@ -534,7 +541,7 @@ function postJSON(url, object, options, callback) {
 /**
  * Simple AJAX GET method
  */
-function getJSON(url, options, callback) {
+BrowserInteractions.prototype.getJSON = function(url, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
 
   var xhr = new XMLHttpRequest();
@@ -553,9 +560,13 @@ function getJSON(url, options, callback) {
   xhr.send();
 }
 
-function setDiv(id, text) {
+BrowserInteractions.prototype.setDiv = function(id, text) {
   document.getElementById(id).innerHTML = text;
 }
 
-module.exports = { setDiv, getJSON, postJSON };
+BrowserInteractions.prototype.setTimeout = function(cb, timeout) {
+  return setTimeout(cb, timeout);
+}
+
+module.exports = { BrowserInteractions }
 },{}]},{},[3]);

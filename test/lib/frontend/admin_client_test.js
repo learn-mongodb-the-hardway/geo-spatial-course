@@ -1,6 +1,3 @@
-const assert = require('assert');
-const ejs = require('ejs');
-const { JSDOM } = require("jsdom");
 const sinon = require('sinon');
 const { AdminClient, addPub } = require('../../../lib/frontend/admin_client');
 const { BrowserInteractions } = require('../../../lib/frontend/shared');
@@ -77,7 +74,9 @@ describe("AdminClient", () => {
 
       // Trigger the location callback successfully
       geoLocation.listeners['location'][0]({
-        latitude: 100, longitude: 50
+        coords: {
+          latitude: 100, longitude: 50
+        }
       });
 
       // Verify the mocks
@@ -123,7 +122,9 @@ describe("AdminClient", () => {
 
       // Trigger the location callback successfully
       geoLocation.listeners['location'][0]({
-        latitude: 100, longitude: 50
+        coords: {
+          latitude: 100, longitude: 50
+        }
       });
 
       // Verify the mocks
@@ -138,9 +139,6 @@ describe("AdminClient", () => {
       // Create a mock for Leaflet
       const leafletMock = sinon.mock(leaflet);
       leafletMock.expects('init').once();
-      // leafletMock.expects('center').once();
-      // leafletMock.expects('addMarkers').exactly(2);
-      // leafletMock.expects('moveToLocation').once();
 
       // Create a mock for GeoLocation
       const geoLocationMock = sinon.mock(geoLocation);
@@ -181,36 +179,37 @@ describe("AdminClient", () => {
     });
   });
 
-  describe("addPub", async () => {
+});
+
+describe("addPub", async () => {
     
-    it('correctly execute postJSON', async () => {
-      const browser = new BrowserInteractions();
-      // Create global mock
-      const browserMock = sinon.mock(browser);
-      browserMock.expects('postJSON').once();
+  it('correctly execute postJSON', async () => {
+    const browser = new BrowserInteractions();
+    // Create global mock
+    const browserMock = sinon.mock(browser);
+    browserMock.expects('postJSON').once();
 
-      // Execute add pub method
-      addPub({
-        url: '/admin', id: 1, _id: 100
-      }, browser)
-    });
-
-    it('correctly execute postJSON and return result', async () => {
-      const browser = new BrowserInteractions();
-      // Create global mock
-      const browserMock = sinon.mock(browser);
-      browserMock.expects('setDiv').once();
-
-      // Trigger result returned
-      browser.postJSON = function(path, obj, options, cb) {
-        cb(null, '');
-      }
-
-      // Execute add pub method
-      addPub({
-        url: '/admin', id: 1, _id: 100
-      }, browser)
-    });
-
+    // Execute add pub method
+    addPub({
+      url: '/admin', id: 1, _id: 100
+    }, browser)
   });
+
+  it('correctly execute postJSON and return result', async () => {
+    const browser = new BrowserInteractions();
+    // Create global mock
+    const browserMock = sinon.mock(browser);
+    browserMock.expects('setDiv').once();
+
+    // Trigger result returned
+    browser.postJSON = function(path, obj, options, cb) {
+      cb(null, '');
+    }
+
+    // Execute add pub method
+    addPub({
+      url: '/admin', id: 1, _id: 100
+    }, browser)
+  });
+
 });
