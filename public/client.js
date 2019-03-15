@@ -1,20 +1,15 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const { setDiv, postJSON } = require('./shared');
-const { Leaflet } = require('./leaflet');
-const { GeoLocation } = require('./geo_location');
 
-var AdminClient = function(options) {
+var AdminClient = function(leaflet, location, options) {
   this.mymap = null;
   this.options = options;
-  this.location = new GeoLocation();
+  this.leaflet = leaflet;
+  this.location = location;
 }
 
 AdminClient.prototype.setup = function() {
   var self = this;
-
-  // Create a leaflet container
-  this.leaflet = new Leaflet(
-    self.options.mapDivId, self.options.accessToken);
 
   // Initialize
   this.leaflet.init();
@@ -107,7 +102,7 @@ function addPub(marker) {
 }
 
 module.exports = { AdminClient, addPub }
-},{"./geo_location":2,"./leaflet":4,"./shared":6}],2:[function(require,module,exports){
+},{"./shared":6}],2:[function(require,module,exports){
 function notifyAll(listeners, event, obj) {
   if (listeners[event]) {
     listeners[event].forEach(function(cb) {
@@ -144,13 +139,17 @@ module.exports = { GeoLocation };
 // Import all the classes
 const {AdminClient, addPub } = require('./admin_client');
 const { PubCrawlClient, mobileSetup } = require('./mobile_client');
+const { Leaflet } = require('./leaflet');
+const { GeoLocation } = require('./geo_location');
 
 // Map the classes to the window global object
 window.AdminClient = AdminClient;
 window.addPub = addPub;
 window.PubCrawlClient = PubCrawlClient;
 window.mobileSetup = mobileSetup;
-},{"./admin_client":1,"./mobile_client":5}],4:[function(require,module,exports){
+window.Leaflet = Leaflet;
+window.GeoLocation = GeoLocation;
+},{"./admin_client":1,"./geo_location":2,"./leaflet":4,"./mobile_client":5}],4:[function(require,module,exports){
 var Leaflet = function(mapDivId, accessToken, options) {
   this.mapDivId = mapDivId;
   this.accessToken = accessToken;
@@ -537,7 +536,7 @@ function postJSON(url, object, options, callback) {
  */
 function getJSON(url, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
-  
+
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url);
   xhr.setRequestHeader('Content-Type', 'application/json');

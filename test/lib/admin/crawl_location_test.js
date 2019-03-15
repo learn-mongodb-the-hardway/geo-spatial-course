@@ -68,6 +68,10 @@ describe("/crawls/location Routes", () => {
             }
           }        
 
+          window.Leaflet = function() {}
+
+          window.GeoLocation = function() {}
+
           window.AdminClient = function() {
             return {
               setup: function() {}
@@ -121,6 +125,10 @@ describe("/crawls/location Routes", () => {
             }
           }        
 
+          window.Leaflet = function() {}
+
+          window.GeoLocation = function() {}
+
           window.AdminClient = function() {
             return {
               setup: function() {}
@@ -165,6 +173,10 @@ describe("/crawls/location Routes", () => {
               on: function() {}
             }
           }        
+
+          window.Leaflet = function() {}
+
+          window.GeoLocation = function() {}
 
           window.AdminClient = function() {
             return {

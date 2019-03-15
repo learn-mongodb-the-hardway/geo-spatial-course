@@ -29,16 +29,25 @@
       </script>
     <% if (crawl._id != null) { %>
       <script>
-        new AdminClient({
-          accessToken: '<%= options.accessToken %>',
-          mapDivId: 'mapid',
-          id: '<%= crawl._id %>',
-          url: '<%= url("crawls/pub") %>',
-          pubs: <%- JSON.stringify(crawl.pubs) %>,
-          searchPubs: <%- JSON.stringify(pubs) %>,
-          location: <%- JSON.stringify(crawl.location || {}) %>,
-          locationDistance: <%- crawl.locationDistance || 1000 %>
-        }).setup();
+        function setupAdminClient() {
+          // Create map instance
+          var leaflet = new Leaflet(
+            'mapid', '<%= options.accessToken %>');
+          var location = new GeoLocation();
+          // Create ans setup our admin client
+          new AdminClient(leaflet, location, {
+            accessToken: '<%= options.accessToken %>',
+            mapDivId: 'mapid',
+            id: '<%= crawl._id %>',
+            url: '<%= url("crawls/pub") %>',
+            pubs: <%- JSON.stringify(crawl.pubs) %>,
+            searchPubs: <%- JSON.stringify(pubs) %>,
+            location: <%- JSON.stringify(crawl.location || {}) %>,
+            locationDistance: <%- crawl.locationDistance || 1000 %>
+          }).setup();
+        }
+
+        setupAdminClient();
       </script>
     <% } %>
   </footer>

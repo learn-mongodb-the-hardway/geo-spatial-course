@@ -138,13 +138,12 @@ client.connect(async (err, client) => {
 
   // Add the additional fields to the request
   app.use((req, res, next) => {
-
     // Add the database
     req.db = client.db(databaseName);
     // Add the options
     req.options = {
       accessToken: accessToken, secret: secret
-    }
+    };
 
     // Add the models
     req.models = {

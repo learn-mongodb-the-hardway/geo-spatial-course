@@ -359,9 +359,13 @@ describe("/crawls/pub Routes", () => {
               datetimepicker: function() {},
               on: function() {}
             }
-          }        
+          }
+          
+          window.Leaflet = function() {}
 
-          window.AdminClient = function(options) {
+          window.GeoLocation = function() {}
+
+          window.AdminClient = function(leaflet, location, options) {
             setupOptions = options;
 
             return {
@@ -424,7 +428,11 @@ describe("/crawls/pub Routes", () => {
             }
           }        
 
-          window.AdminClient = function(options) {
+          window.Leaflet = function() {}
+
+          window.GeoLocation = function() {}
+
+          window.AdminClient = function(leaflet, location, options) {
             setupOptions = options;
 
             return {
@@ -486,7 +494,11 @@ describe("/crawls/pub Routes", () => {
             }
           }        
 
-          window.AdminClient = function(options) {
+          window.Leaflet = function() {}
+
+          window.GeoLocation = function() {}
+
+          window.AdminClient = function(leaflet, location, options) {
             setupOptions = options;
             return {
               setup: function() {}
