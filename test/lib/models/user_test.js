@@ -187,7 +187,7 @@ describe("User Model", () => {
       assert.equal(0, Object.keys(errors).length);
 
       // Set a new location (fake one)
-      await user.updateLocation(userId, { location: {} });
+      await user.updateLocation(userId, { location: { polygon: {} } });
 
       // Get the document
       const doc = await database.collection('users').findOne({
@@ -195,7 +195,7 @@ describe("User Model", () => {
       });
 
       assert.notEqual(null, doc);
-      assert.deepEqual({ location: {} }, doc.location);
+      assert.deepEqual({ location: { polygon: {} } }, doc.location);
       assert.notEqual(null, doc.updatedOn);
     });
 

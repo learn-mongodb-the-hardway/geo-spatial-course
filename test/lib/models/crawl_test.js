@@ -246,6 +246,26 @@ describe("Crawl Model", () => {
       assert.deepEqual(crawlId, docs[0]._id);
     });
 
+    it('fail to update Location object due to not valid object', async () => {
+      const crawlId = ObjectId();
+      const currentTimeMS = new Date().getTime();
+      var errors = await crawl.create(
+        crawlId, 'name', 'description', 'username', new Date(currentTimeMS), new Date(currentTimeMS + 20000), true, [], {}
+      );
+
+      // Do assertions
+      assert.equal(0, Object.keys(errors).length);
+
+      try {
+        await crawl.updateLocation(crawlId, {
+          polygon: null
+        });  
+
+        assert(false);
+      } catch (error) {
+        assert.equal('location.polygon cannot be null', error.message);
+      }
+    });
   });
 
   describe('updateSearchLocations', async () => {
@@ -253,8 +273,6 @@ describe("Crawl Model", () => {
     it('successfully update search location object', async () => {
       const crawlId = ObjectId();
       const currentTimeMS = new Date().getTime();
-      const center = [71, 0.35];
-      const locationPolygon = circleToPolygon(center, 1000);
       var errors = await crawl.create(
         crawlId, 'name', 'description', 'username', new Date(currentTimeMS), new Date(currentTimeMS + 20000), true, [], {}
       );
@@ -264,7 +282,7 @@ describe("Crawl Model", () => {
 
       // Attempt to update
       const result = await crawl.updateSearchLocations(crawlId, [{
-        hello: 'world'
+        center: [], geometry: {}
       }], 500);
 
       // Assertions
@@ -277,7 +295,7 @@ describe("Crawl Model", () => {
       assert.notEqual(null, doc);
       assert.equal(1, doc.searchLocations.length);
       assert.equal(500, doc.locationDistance);
-      assert.deepEqual({ hello: 'world' }, doc.searchLocations[0]);
+      assert.deepEqual({ center: [], geometry: {} }, doc.searchLocations[0]);
     });
 
   });
