@@ -46,12 +46,8 @@ describe("/mobile/attendants Routes", () => {
       const secondAttendantId = ObjectId();
 
       // Attempt to create the user
-      await user.create(firstAttendantId, "petrus petrus", "petrus", "petrus", "petrus", {
-        role: "attendant"
-      });
-      await user.create(secondAttendantId, "petrus2 petrus2", "petrus2", "petrus2", "petrus2", {
-        role: "attendant"
-      });
+      await user.create(firstAttendantId, "petrus petrus", "petrus", "petrus", "petrus", {});
+      await user.create(secondAttendantId, "petrus2 petrus2", "petrus2", "petrus2", "petrus2", {});
 
       // Create a new pub crawl
       await crawl.create(crawlId, "Crawl 1", "Crawl Description", "peter", new Date(new Date().getTime() - 100000), new Date(new Date().getTime() + 100000), true, [], {

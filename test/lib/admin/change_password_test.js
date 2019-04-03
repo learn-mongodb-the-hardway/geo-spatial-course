@@ -64,9 +64,7 @@ describe("/crawls/create Routes", () => {
 
     it('successfully user password', async () => {
       const userId = ObjectId();
-      await user.create(userId, "petrus_100", "petrus_100", "petrus_100", "petrus_100", {
-        role: 'admin'
-      });
+      await user.create(userId, "petrus_100", "petrus_100", "petrus_100", "petrus_100", {});
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
@@ -94,9 +92,7 @@ describe("/crawls/create Routes", () => {
 
     it('should fail due to no fields set', async () => {
       const userId = ObjectId();
-      await user.create(userId, "petrus_400", "petrus_400", "petrus_400", "petrus_400", {
-        role: 'admin'
-      });
+      await user.create(userId, "petrus_400", "petrus_400", "petrus_400", "petrus_400", {});
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
@@ -121,9 +117,7 @@ describe("/crawls/create Routes", () => {
 
     it('should fail due to passwords not matching', async () => {
       const userId = ObjectId();
-      await user.create(userId, "petrus_600", "petrus_600", "petrus_600", "petrus_600", {
-        role: 'admin'
-      });
+      await user.create(userId, "petrus_600", "petrus_600", "petrus_600", "petrus_600", {});
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
@@ -146,9 +140,7 @@ describe("/crawls/create Routes", () => {
 
     it('should fail due to current password not matching', async () => {
       const userId = ObjectId();
-      await user.create(userId, "petrus_600", "petrus_700", "petrus_600", "petrus_600", {
-        role: 'admin'
-      });
+      await user.create(userId, "petrus_600", "petrus_700", "petrus_600", "petrus_600", {});
       const userDoc = await user.findById(userId);
 
       // Prepare the mock request
