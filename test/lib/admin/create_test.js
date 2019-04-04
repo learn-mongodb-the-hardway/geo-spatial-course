@@ -42,7 +42,9 @@ describe("Admin /create Route", () => {
       const req = mockRequest({ db: database, models: { user }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          window.GeoLocation = function() {}
+        }});
       }});
 
       // Execute the indexGet
@@ -64,7 +66,9 @@ describe("Admin /create Route", () => {
       const req = mockRequest({ db: database, models: { user }, body: {}, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          window.GeoLocation = function() {}
+        }});
       }});
 
       // Execute the indexGet
@@ -85,7 +89,9 @@ describe("Admin /create Route", () => {
       }, session: {}, options: {}, baseUrl: '/admin'})
       const res = mockResponse({ render: async function(template, object) {
         const result = await ejs.renderFile(`views/${template}`, object || {});
-        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {}});
+        doc = new JSDOM(result, { runScripts: "dangerously", beforeParse: (window) => {
+          window.GeoLocation = function() {}
+        }});
       }});
 
       // Execute the indexGet

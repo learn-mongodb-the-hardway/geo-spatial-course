@@ -15,7 +15,6 @@ describe("Postcode Model", () => {
     client = await (MongoClient(url, { useNewUrlParser: true })).connect();
     // Get and drop the test database
     database = client.db(databaseName);
-    await database.dropDatabase();
     postcode = new PostCode(database.collection('postcodes'));
   });
 
@@ -32,7 +31,7 @@ describe("Postcode Model", () => {
     it('successfully create a new postcode', async () => {
       const postcodeId = ObjectId();
       const errors = await postcode.create(
-        postcodeId, 'name', 'description', { coordinates: [] }, {}
+        postcodeId, 'name', 'description', { type: 'Point', coordinates: [50.1, 10.1] }, {}
       );
 
       // Grab the user doc
@@ -45,7 +44,7 @@ describe("Postcode Model", () => {
       assert.notEqual(null, doc);
       assert.equal('name', doc.name);
       assert.equal('description', doc.description);
-      assert.deepEqual({ coordinates: [] }, doc.geometry);
+      assert.deepEqual({ type: 'Point', coordinates: [50.1, 10.1] }, doc.geometry);
     });
 
     it('fail to create a new postcode due to parameters being null', async () => {
@@ -61,6 +60,16 @@ describe("Postcode Model", () => {
       assert.equal('geometry cannot be empty', errors.geometry);
     });
 
+    it('fail to create a new postcode due to illegal GeoJSON instance', async () => {
+      const postcodeId = ObjectId();
+      const errors = await postcode.create(
+        new ObjectId(), 'name', 'description', { typ: 'Point', coordinates: [50.1, 10.1] }, {}
+      );
+
+      // Do assertions
+      assert.equal(1, Object.keys(errors).length);
+      assert.equal('geometry is not a GeoJSON object', errors.geometry);
+    });
   });
 
   describe('findBy', async () => {
@@ -68,7 +77,7 @@ describe("Postcode Model", () => {
     it('findOneByName', async () => {
       const postcodeId = ObjectId();
       const errors = await postcode.create(
-        postcodeId, 'name2', 'description', { coordinates: [] }, {}
+        postcodeId, 'name2', 'description', { type: 'Point', coordinates: [50.1, 10.1] }, {}
       );
 
       // Do assertions

@@ -74,6 +74,8 @@ describe("Mobile Tests", () => {
               mobileSetupExecuted = true;
             }
 
+            window.GeoLocation = function() {}
+
             window.BrowserInteractions = () => {}
 
             window.Leaflet = function() {}
@@ -185,6 +187,8 @@ describe("Mobile Tests", () => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
+
+            window.GeoLocation = function() {}
           }});
         }});
   
@@ -379,6 +383,8 @@ describe("Mobile Tests", () => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
+
+            window.GeoLocation = function() {}
           }});
 
         }});
@@ -435,6 +441,8 @@ describe("Mobile Tests", () => {
             window.mobileSetup = () => {
               mobileSetupExecuted = true;
             }
+
+            window.GeoLocation = function() {}
           }});
         }});
   

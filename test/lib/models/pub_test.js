@@ -16,7 +16,6 @@ describe("Pub Model", () => {
     client = await (MongoClient(url, { useNewUrlParser: true })).connect();
     // Get and drop the test database
     database = client.db(databaseName);
-    await database.dropDatabase();
     pub = new Pub(database.collection('pubs'));
     // Create a 2dsphere index
     await pub.createIndexes();

@@ -15,7 +15,6 @@ describe("User Model", () => {
     client = await (MongoClient(url, { useNewUrlParser: true })).connect();
     // Get and drop the test database
     database = client.db(databaseName);
-    await database.dropDatabase();
     user = new User(database.collection('users'));
   });
 
@@ -32,7 +31,7 @@ describe("User Model", () => {
     it('successfully create a new user', async () => {
       const userId = ObjectId();
       const errors = await user.create(
-        userId, 'peter', 'peter', 'peter', 'peter', {}
+        userId, 'peter', 'peter345', 'peter', 'peter', {}
       );
 
       // Grab the user doc
@@ -44,7 +43,7 @@ describe("User Model", () => {
       assert.equal(0, Object.keys(errors).length);
       assert.notEqual(null, doc);
       assert.equal('peter', doc.name);
-      assert.equal('peter', doc.username);
+      assert.equal('peter345', doc.username);
       assert.notEqual(null, doc.password);
       assert.notEqual(null, doc.createdOn);
     });

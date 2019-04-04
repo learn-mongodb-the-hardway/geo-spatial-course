@@ -48,6 +48,9 @@ describe("PubCrawlClient", () => {
       // Verify the mocks
       leafletMock.verify();
       geoLocationMock.verify();
+
+      // Clear
+      clearInterval(client.intervalId);
     });
 
     it('successfully return location on setup', async () => {
@@ -95,6 +98,9 @@ describe("PubCrawlClient", () => {
       leafletMock.verify();
       geoLocationMock.verify();
       browserMock.verify();
+
+      // Clear
+      clearInterval(client.intervalId);
     });
 
   });
@@ -137,6 +143,9 @@ describe("PubCrawlClient", () => {
 
       // Verify the mocks
       browserMock.verify();
+
+      // Clear
+      clearInterval(client.intervalId);
     });
 
   });
@@ -176,6 +185,9 @@ describe("PubCrawlClient", () => {
 
       // Verify the mocks
       leafletMock.verify();
+
+      // Clear
+      clearInterval(client.intervalId);
     });
 
   });
@@ -211,6 +223,9 @@ describe("PubCrawlClient", () => {
 
       // Verify the mocks
       leafletMock.verify();
+
+      // Clear
+      clearInterval(client.intervalId);
     });
 
   });

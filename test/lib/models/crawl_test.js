@@ -21,7 +21,6 @@ describe("Crawl Model", () => {
     client = await (MongoClient(url, { useNewUrlParser: true })).connect();
     // Get and drop the test database
     database = client.db(databaseName);
-    await database.dropDatabase();
     crawl = new Crawl(database.collection('crawls'));
     pub = new Pub(database.collection('pubs'));
     user = new User(database.collection('users'));
