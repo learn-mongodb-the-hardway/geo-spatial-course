@@ -1,4 +1,5 @@
 const assert = require('assert');
+const faker = require('faker');
 const { MongoClient, ObjectId } = require('mongodb');
 const { User } = require('../../../lib/models/user');
 
@@ -30,8 +31,9 @@ describe("User Model", () => {
 
     it('successfully create a new user', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       const errors = await user.create(
-        userId, 'peter', 'peter345', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
 
       // Grab the user doc
@@ -43,20 +45,21 @@ describe("User Model", () => {
       assert.equal(0, Object.keys(errors).length);
       assert.notEqual(null, doc);
       assert.equal('peter', doc.name);
-      assert.equal('peter345', doc.username);
+      assert.equal(userName, doc.username);
       assert.notEqual(null, doc.password);
-      assert.notEqual(null, doc.createdOn);
+      assert.notEqual('peter', doc.password);
+      assert(doc.createdOn instanceof Date);
     });
 
 
     it('fail due to no field values passed', async () => {
-      const userId = ObjectId();
       const errors = await user.create(
-        userId, null, null, null, null, {}
+        null, null, null, null, null, {}
       );
 
       // Do assertions
-      assert.equal(4, Object.keys(errors).length);
+      assert.equal(5, Object.keys(errors).length);
+      assert.equal('id cannot be null', errors.id);
       assert.equal('name cannot be blank', errors['name']);
       assert.equal('username cannot be blank', errors['username']);
       assert.equal('password cannot be blank', errors['password']);
@@ -64,9 +67,8 @@ describe("User Model", () => {
     });
 
     it('password do not match', async () => {
-      const userId = ObjectId();
       const errors = await user.create(
-        userId, 'peter', 'peter', 'peter', 'peter2', {}
+        new ObjectId(), 'peter', 'peter', 'peter', 'peter2', {}
       );
 
       // Do assertions
@@ -75,18 +77,21 @@ describe("User Model", () => {
     });
 
     it('user already exists', async () => {
-      const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter10', 'peter', 'peter', {}
+        new ObjectId(), 'peter', userName, 'peter', 'peter', {}
       );
-      
+
+      // Do assertions
+      assert.equal(0, Object.keys(errors).length);
+
       errors = await user.create(
-        userId, 'peter', 'peter10', 'peter', 'peter', {}
+        new ObjectId(), 'peter', userName, 'peter', 'peter', {}
       );
 
       // Do assertions
       assert.equal(1, Object.keys(errors).length);
-      assert.equal('user peter10 already exists', errors['error']);
+      assert.equal(`user ${userName} already exists`, errors['error']);
     });
   });
 
@@ -94,17 +99,18 @@ describe("User Model", () => {
 
     it('correctly change password', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter20', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
+
+      // Do assertions
+      assert.equal(0, Object.keys(errors).length);
 
       // Grab the user doc
       const beforeDoc = await database.collection('users').findOne({
         _id: userId
       });
-
-      // Do assertions
-      assert.equal(0, Object.keys(errors).length);
 
       // Attempt to change the user password
       errors = await user.changePassword(userId, 'peter', 'peter2', 'peter2');
@@ -119,27 +125,32 @@ describe("User Model", () => {
       assert.notEqual(beforeDoc.password, afterDoc.password);
     });
 
-    it('should fail due to wrong existing password', async () => {
+    it('should fail due to parameters being null', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter30', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
 
       // Do assertions
       assert.equal(0, Object.keys(errors).length);
 
       // Attempt to change the user password
-      errors = await user.changePassword(userId, 'peter1', 'peter2', 'peter2');
+      errors = await user.changePassword(null, null, null, null);
 
       // Do assertions
-      assert.equal(1, Object.keys(errors).length);
-      assert.equal('User does not exist or current password entered is wrong', errors['error']);
+      assert.equal(4, Object.keys(errors).length);
+      assert.equal('id cannot be null', errors['id']);
+      assert.equal('currentPassword cannot be blank', errors['current_password']);
+      assert.equal('password cannot be blank', errors['password']);
+      assert.equal('confirmPassword cannot be blank', errors['confirm_password']);
     });
 
     it('should fail due to mismatched new passwords', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter40', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
 
       // Do assertions
@@ -153,49 +164,72 @@ describe("User Model", () => {
       assert.equal('password and confirm password must be equal', errors['error']);
     });
 
-    it('should fail due to fields being null', async () => {
+    it('should fail due to wrong existing password', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter50', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
 
       // Do assertions
       assert.equal(0, Object.keys(errors).length);
 
       // Attempt to change the user password
-      errors = await user.changePassword(userId, null, null, null);
+      errors = await user.changePassword(userId, 'peter1', 'peter2', 'peter2');
 
-      // console.dir(errors)
       // Do assertions
-      assert.equal(3, Object.keys(errors).length);
-      assert.equal('currentPassword cannot be blank', errors['current_password']);
-      assert.equal('password cannot be blank', errors['password']);
-      assert.equal('confirmPassword cannot be blank', errors['confirm_password']);
+      assert.equal(1, Object.keys(errors).length);
+      assert.equal('User does not exist or current password entered is wrong', errors['error']);
     });
+
   });
 
   describe('updateLocation', async () => {
 
     it('should set location object', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter100', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
 
       // Do assertions
       assert.equal(0, Object.keys(errors).length);
 
       // Set a new location (fake one)
-      await user.updateLocation(userId, { location: { polygon: {} } });
+      await user.updateLocation(userId, { type: 'Point', coordinates: [50.1, 10.1] });
 
       // Get the document
       const doc = await database.collection('users').findOne({
         _id: userId
       });
 
-      assert.notEqual(null, doc);
-      assert.deepEqual({ location: { polygon: {} } }, doc.location);
+      assert.deepEqual({ type: 'Point', coordinates: [50.1, 10.1] }, doc.location);
       assert.notEqual(null, doc.updatedOn);
+    });
+
+    it('should fail to updateLocation called with illegal parameters', async () => {
+      const userId = ObjectId();
+      const userName = faker.internet.userName();
+      var errors = await user.create(
+        userId, 'peter', userName, 'peter', 'peter', {}
+      );
+
+      // Do assertions
+      assert.equal(0, Object.keys(errors).length);
+
+
+      assert.rejects(async () => {
+        await user.updateLocation(null, null);
+      }, new Error('id parameter cannot be null'));
+      
+      assert.rejects(async () => {
+        await user.updateLocation(userId, null);
+      }, new Error('location parameter cannot be null'));
+
+      assert.rejects(async () => {
+        await user.updateLocation(userId, { typ: 'Point', coordinates: [50.1, 10.1] });
+      }, new Error('location parameter is not a valid GeoJSON object instance'));
     });
 
   });
@@ -204,8 +238,9 @@ describe("User Model", () => {
 
     it('findById', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter110', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
 
       // Do assertions
@@ -215,23 +250,24 @@ describe("User Model", () => {
       const doc = await user.findById(userId);
 
       assert.notEqual(null, doc);
-      assert.equal('peter110', doc.username);
+      assert.equal(userName, doc.username);
     });
 
     it('findByUsername', async () => {
       const userId = ObjectId();
+      const userName = faker.internet.userName();
       var errors = await user.create(
-        userId, 'peter', 'peter120', 'peter', 'peter', {}
+        userId, 'peter', userName, 'peter', 'peter', {}
       );
 
       // Do assertions
       assert.equal(0, Object.keys(errors).length);
 
       // Get the document
-      const doc = await user.findOneByUsername('peter120');
+      const doc = await user.findOneByUsername(userName);
 
       assert.notEqual(null, doc);
-      assert.equal('peter120', doc.username);
+      assert.equal(userName, doc.username);
     });
   });
 });
