@@ -48,20 +48,19 @@ describe("Postcode Model", () => {
     });
 
     it('fail to create a new postcode due to parameters being null', async () => {
-      const postcodeId = ObjectId();
       const errors = await postcode.create(
-        postcodeId, null, null, null, {}
+        null, null, null, null, {}
       );
 
       // Do assertions
-      assert.equal(3, Object.keys(errors).length);
+      assert.equal(4, Object.keys(errors).length);
+      assert.equal('id cannot be null', errors.id);
       assert.equal('name cannot be blank', errors.name);
       assert.equal('description cannot be blank', errors.description);
       assert.equal('geometry cannot be empty', errors.geometry);
     });
 
     it('fail to create a new postcode due to illegal GeoJSON instance', async () => {
-      const postcodeId = ObjectId();
       const errors = await postcode.create(
         new ObjectId(), 'name', 'description', { typ: 'Point', coordinates: [50.1, 10.1] }, {}
       );
