@@ -24,6 +24,10 @@ describe("Crawl Model", () => {
     crawl = new Crawl(database.collection('crawls'));
     pub = new Pub(database.collection('pubs'));
     user = new User(database.collection('users'));
+    // Delete documents
+    database.collection('crawls').deleteMany({});
+    database.collection('pubs').deleteMany({});
+    database.collection('users').deleteMany({});
     // Create a 2dsphere index
     await crawl.createIndexes();
   });
@@ -60,7 +64,7 @@ describe("Crawl Model", () => {
       assert.equal(new Date(currentTimeMS + 2000).toString(), doc.to.toString());
       assert.equal(false, doc.published);
       assert.deepEqual([], doc.pubs);
-      assert.notEqual(null, doc.createdOn);
+      assert(doc.createdOn instanceof Date);
     });
 
     it('fail to create a new pub crawl due to parameters being null', async () => {
