@@ -15,6 +15,8 @@ describe("Postcode Model", () => {
     client = await (MongoClient(url, { useNewUrlParser: true })).connect();
     // Get and drop the test database
     database = client.db(databaseName);
+    // Clear out the pubs collection
+    await database.collection('postcodes').deleteMany({});
     postcode = new PostCode(database.collection('postcodes'));
   });
 

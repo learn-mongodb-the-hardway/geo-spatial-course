@@ -16,6 +16,7 @@ describe("User Model", () => {
     client = await (MongoClient(url, { useNewUrlParser: true })).connect();
     // Get and drop the test database
     database = client.db(databaseName);
+    await database.collection('users').deleteMany({});
     user = new User(database.collection('users'));
   });
 
