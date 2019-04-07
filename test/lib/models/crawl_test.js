@@ -68,13 +68,13 @@ describe("Crawl Model", () => {
     });
 
     it('fail to create a new pub crawl due to parameters being null', async () => {
-      const crawlId = ObjectId();
       const errors = await crawl.create(
-        crawlId, null, null, null, null, null, null, null, {}
+        null, null, null, null, null, null, null, null, {}
       );
       
       // Do assertions
-      assert.equal(5, Object.keys(errors).length);
+      assert.equal(6, Object.keys(errors).length);
+      assert.equal('id cannot be null', errors.id);
       assert.equal('name cannot be null or empty', errors.name);
       assert.equal('description cannot be null or empty', errors.description);
       assert.equal('username cannot be null or empty', errors.username);
@@ -83,17 +83,12 @@ describe("Crawl Model", () => {
     });
 
     it('fail to create a new pub crawl due to from date > to date', async () => {
-      const crawlId = ObjectId();
-      const time = new Date().getTime();
       const errors = await crawl.create(
-        crawlId, null, null, null, new Date(time + 20000), new Date(), null, null, {}
+        ObjectId(), 'name', 'description', 'username', new Date(new Date().getTime() + 20000), new Date(), null, null, null
       );
       
       // Do assertions
-      assert.equal(4, Object.keys(errors).length);
-      assert.equal('name cannot be null or empty', errors.name);
-      assert.equal('description cannot be null or empty', errors.description);
-      assert.equal('username cannot be null or empty', errors.username);
+      assert.equal(1, Object.keys(errors).length);
       assert.equal('end date must be after start date', errors.error);
     });
   });
