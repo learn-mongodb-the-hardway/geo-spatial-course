@@ -189,7 +189,7 @@ describe("Crawl Model", () => {
       assert.notEqual(null, doc);
       assert.deepEqual(crawlId, doc._id);
       assert.equal(1, doc.pubs.length);
-      assert.equal(0, doesNotContainFields(doc.pubs[0], ['_id', 'name', 'geometry', 'street', 'housenumber', 'postcode', 'city', 'createdOn']))
+      assert(containFields(doc.pubs[0], ['_id', 'name', 'geometry', 'street', 'housenumber', 'postcode', 'city', 'createdOn']))
     });
 
     it('findOneByIdWithAttendants', async () => {
@@ -213,7 +213,7 @@ describe("Crawl Model", () => {
       assert.notEqual(null, doc);
       assert.deepEqual(crawlId, doc._id);
       assert.equal(1, doc.attendants.length);
-      assert.equal(0, doesNotContainFields(doc.attendants[0], ['_id', 'name', 'username', 'password', 'createdOn']))
+      assert(containFields(doc.attendants[0], ['_id', 'name', 'username', 'password', 'createdOn']))
     });
   });
 
@@ -373,17 +373,8 @@ describe("Crawl Model", () => {
     });
 
     it('fail to update Location object due to not valid object', async () => {
-      const crawlId = ObjectId();
-      const currentTimeMS = new Date().getTime();
-      var errors = await crawl.create(
-        crawlId, 'name', 'description', 'username', new Date(currentTimeMS), new Date(currentTimeMS + 20000), true, [], {}
-      );
-
-      // Do assertions
-      assert.equal(0, Object.keys(errors).length);
-
       try {
-        await crawl.updateLocation(crawlId, {
+        await crawl.updateLocation(new ObjectId(), {
           polygon: null
         });  
 
@@ -420,10 +411,31 @@ describe("Crawl Model", () => {
       // Assertions
       assert.notEqual(null, doc);
       assert.equal(1, doc.searchLocations.length);
-      assert.equal(500, doc.locationDistance);
       assert.deepEqual({ center: [], geometry: {} }, doc.searchLocations[0]);
+      assert.equal(500, doc.locationDistance);
     });
 
+    it('fail update search location object due to illegal values', async () => {
+      try {
+        await crawl.updateSearchLocations(new ObjectId(), [{
+          center: []
+        }], 500);
+        
+        assert(false);
+      } catch (err) {
+        assert.equal('location.geometry cannot be null', err.message);
+      }
+
+      try {
+        await crawl.updateSearchLocations(new ObjectId(), [{
+          geometry: {}
+        }], 500);
+        
+        assert(false);
+      } catch (err) {
+        assert.equal('location.center cannot be null', err.message);
+      }
+    });
   });
 
   describe('addUserToPubs', async () => {
