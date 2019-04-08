@@ -24,4 +24,10 @@ function doesNotContainFields(doc, fields) {
   });
 };
 
-module.exports = { waitOneTick, readAccessToken, doesNotContainFields };
+function containFields(doc, fields) {
+  return fields.filter(field => {
+    return doc[field] != null;
+  });
+};
+
+module.exports = { waitOneTick, readAccessToken, doesNotContainFields, containFields };
