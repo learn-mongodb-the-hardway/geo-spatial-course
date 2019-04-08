@@ -25,9 +25,9 @@ describe("Crawl Model", () => {
     pub = new Pub(database.collection('pubs'));
     user = new User(database.collection('users'));
     // Delete documents
-    database.collection('crawls').deleteMany({});
-    database.collection('pubs').deleteMany({});
-    database.collection('users').deleteMany({});
+    await database.collection('crawls').deleteMany({});
+    await database.collection('pubs').deleteMany({});
+    await database.collection('users').deleteMany({});
     // Create a 2dsphere index
     await crawl.createIndexes();
   });
@@ -263,6 +263,7 @@ describe("Crawl Model", () => {
     });
 
     it('fail to update due to from date > to date', async () => {
+      var currentTimeMS = new Date().getTime();
       // Attempt to update pub crawl
       var errors = await crawl.update(
         ObjectId(), 'name2', 'description2', new Date(currentTimeMS + 20000), new Date(currentTimeMS)
