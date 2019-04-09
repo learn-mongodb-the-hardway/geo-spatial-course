@@ -220,15 +220,15 @@ describe("User Model", () => {
       assert.equal(0, Object.keys(errors).length);
 
 
-      assert.rejects(async () => {
+      await assert.rejects(async () => {
         await user.updateLocation(null, null);
       }, new Error('id parameter cannot be null'));
       
-      assert.rejects(async () => {
+      await assert.rejects(async () => {
         await user.updateLocation(userId, null);
       }, new Error('location parameter cannot be null'));
 
-      assert.rejects(async () => {
+      await assert.rejects(async () => {
         await user.updateLocation(userId, { typ: 'Point', coordinates: [50.1, 10.1] });
       }, new Error('location parameter is not a valid GeoJSON object instance'));
     });

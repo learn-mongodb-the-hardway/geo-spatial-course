@@ -472,6 +472,12 @@ describe("Crawl Model", () => {
       assert.deepEqual(checkInMarks, doc.attendants_location);
     });
 
+    it('should fail due to empty pub list passed', async () => {
+      await assert.rejects(async() => {
+        await crawl.addUserToPubs(new ObjectId(), new ObjectId(), []);
+      }, new Error('pubIds parameter cannot be empty'));
+    });
+
   });
 
   describe('removeUserFromPubs', async () => {
@@ -511,44 +517,12 @@ describe("Crawl Model", () => {
       assert.deepEqual(checkInMarks, doc.attendants_location);
     });
 
-  });
-
-  describe('removeUserFromCrawl', async () => {
-
-    it('successfully remove user from pubs in crawl', async () => {
-      const crawlId = ObjectId();
-      const userId = ObjectId();
-      const pubId = ObjectId();
-      const currentTimeMS = new Date().getTime();
-      var errors = await crawl.create(
-        crawlId, 'name', 'description', 'username', new Date(currentTimeMS), new Date(currentTimeMS + 20000), true, [], {
-          pubs: [pubId], attendants: [userId]
-        }
-      );
-
-      // Do assertions
-      assert.equal(0, Object.keys(errors).length);
-
-      // Attempt to add user to crawl
-      var result = await crawl.addUserToPubs(crawlId, userId, [pubId]);
-
-      // Assertions
-      assert.equal(1, result.matchedCount);
-
-      // Remove the user
-      result = await crawl.removeUserFromCrawl(crawlId, userId);
-
-      // Attempt to publish
-      const doc = await crawl.findOneById(crawlId);
-
-      // Check in marks
-      const checkInMarks = {};
-      checkInMarks[pubId.toString()] = [];
-
-      // Assertions
-      assert.notEqual(null, doc);
-      assert.deepEqual(checkInMarks, doc.attendants_location);
-      assert.deepEqual([], doc.attendants);
+    it('fail removeUserFromPubs due to missing pub crawl doc', async () => {
+      await assert.rejects(async() => {
+        await crawl.removeUserFromPubs(new ObjectId(), new ObjectId(), []);
+      }, (error) => {
+        return error.message.indexOf('could not locate pub crawl with id') != -1;
+      });
     });
 
   });
@@ -578,6 +552,37 @@ describe("Crawl Model", () => {
       // Assertions
       assert.notEqual(null, doc);
       assert.deepEqual([userId], doc.attendants);
+    });
+
+  });
+
+  describe('removeAttendant', async () => {
+
+    it('successfully removeAttendant', async () => {
+      const crawlId = ObjectId();
+      const userId = ObjectId();
+      const currentTimeMS = new Date().getTime();
+      var errors = await crawl.create(
+        crawlId, 'name', 'description', 'username', new Date(currentTimeMS), new Date(currentTimeMS + 20000), true, [], {
+          attendants: [userId]
+        }
+      );
+
+      // Do assertions
+      assert.equal(0, Object.keys(errors).length);
+
+      // Attempt to add user to crawl
+      var result = await crawl.removeAttendant(crawlId, userId);
+
+      // Assertions
+      assert.equal(1, result.matchedCount);
+
+      // Attempt to publish
+      const doc = await crawl.findOneById(crawlId);
+
+      // Assertions
+      assert.notEqual(null, doc);
+      assert.deepEqual([], doc.attendants);
     });
 
   });
@@ -692,6 +697,14 @@ describe("Crawl Model", () => {
       assert.deepEqual([pubId, pubId2], doc.pubs);
     });
   
+    it('fail to moveUp as the pub crawl id does not exist', async () => {
+      await assert.rejects(async() => {
+        await crawl.movePubUp(new ObjectId(), new ObjectId());
+      }, (error) => {
+        return error.message.indexOf('could not locate pub crawl with id') != -1;
+      });
+    });
+
   });
 
 });
