@@ -150,6 +150,54 @@ describe("PubCrawlClient", () => {
 
   });
 
+  describe("loadAttendantsLocations", async () => {
+
+    it('successfully call getJSON', async () => {
+      const leaflet = new Leaflet();
+      const geoLocation = new GeoLocation();
+      const browser = new BrowserInteractions();
+
+      // Create a mock for the leaflet
+      const leafletMock = sinon.mock(leaflet);
+      leafletMock
+        .expects('setLocations')
+        .withExactArgs([], { geometry: "location", id: "_id", label: "name" })
+        .once();
+
+      // Fake GeoLocation
+      var factory = function() {
+        return geoLocation;   
+      }
+
+      // Create a client
+      const client = new PubCrawlClient(leaflet, factory, browser, {
+        mapDivId: 'map',
+        accessToken: 'peterparker'
+      });
+
+      // Trigger result returned
+      browser.getJSON = function(path, options, cb) {
+        cb(null, { _id: 1, locations: [] });
+      }
+      
+      var callbackCalled = false;
+      // Execute setup
+      client.loadAttendantsLocations(() => {
+        callbackCalled = true;
+      });
+
+      // Assertions
+      assert(callbackCalled);
+
+      // Verify the mocks
+      leafletMock.verify();
+
+      // Clear
+      clearInterval(client.intervalId);
+    });
+
+  });
+
   describe("centerNextPub", async () => {
 
     it('successfully call centerNextPub', async () => {

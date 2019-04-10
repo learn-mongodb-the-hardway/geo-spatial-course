@@ -157,6 +157,7 @@ var Leaflet = function(mapDivId, accessToken, options) {
   this.mapDivId = mapDivId;
   this.accessToken = accessToken;
   this.options = options || {};
+  this.attendants = {};
 
   // Current location
   this.currentLocation = null;
@@ -222,6 +223,64 @@ Leaflet.prototype.init = function() {
       'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     id: 'mapbox.streets'
   }).addTo(this.mymap);
+}
+
+Leaflet.prototype.setLocations = function(locations, options) {
+  var self = this;
+  // Safeguard the parameters
+  locations = locations || [];
+  options = options || {};
+
+  // Unpack the options
+  var id = options.id || '_id';
+  var label = options.label || 'label';
+  var geometry = options.geometry || 'location';
+
+  // Remove any users no longer attending from tracking
+  var ids = locations.map(function(location) { return location._id; });
+
+  // Remove any attendants no longer in attendance from the map and our list
+  for (id in self.attendants) {
+    if (ids.indexOf(id) == -1) {
+      self.attendants[id].removeFrom(self.mymap);
+      delete self.attendants[id];
+    }
+  }
+
+  console.dir(locations)
+
+  // Add the users we are tracking
+  locations.forEach(function(location) {
+    var longitude = location[geometry].coordinates[0];
+    var latitude = location[geometry].coordinates[1];
+    var key = location[id];
+
+    if (self.attendants[key]) {
+      self.attendants[key]
+        .setLatLng([latitude, longitude])
+    } else {
+      var greenIcon = new L.Icon({
+        iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+
+      // Create a green marker
+      var marker = L.marker(
+        [latitude, longitude],
+        {icon: greenIcon});
+        // Save to our attendants map
+      self.attendants[key] = marker;
+
+      // Bind tooltip
+      marker.bindTooltip(location[label]);
+      // Add marker to map
+      marker.addTo(self.mymap);
+    }
+  });
 }
 
 Leaflet.prototype.getZoom = function() {
@@ -325,7 +384,6 @@ var PubCrawlClient = function(
   browserInteractions,
   options
 ) {
-  this.mymap = null;
   this.currentLocation = null;
   this.intervalId = null;
   this.options = options;
@@ -414,8 +472,10 @@ function updateLocation(self) {
       self.currentLocation = [location.coords.latitude, location.coords.longitude];
       // Update the current marker location
       self.leaflet.setCurrentLocationMarker(self.currentLocation[0], self.currentLocation[1]);
-      // Update the attendant location
+      // Update the users location
       updateAttendantLocation(self, self.currentLocation);
+      // Update the locations of the attendants
+      self.loadAttendantsLocations();
     });
 
     // Trigger location lookup
@@ -445,6 +505,28 @@ PubCrawlClient.prototype.loadAttendants = function(id, callback) {
       if (callback) callback(err, result);
     });
 }
+
+ PubCrawlClient.prototype.loadAttendantsLocations = function(callback) {
+  var self = this;
+  // Unpack crawlId
+  var crawlId = this.options.pubCrawl && this.options.pubCrawl._id
+    ? this.options.pubCrawl._id
+    : null;
+
+  this.browserInteractions.getJSON('/mobile/locations/' + crawlId, 
+    { parseJSON: true}, function(err, result) {
+      if (err) return alert(err);
+
+      // We are going to update user locations on the map
+      self.leaflet.setLocations(result.locations, {
+        id: '_id',
+        label: 'name',
+        geometry: 'location'
+      });
+
+      if (callback) callback(err, result);
+    });   
+ }
 
 PubCrawlClient.prototype.centerNextPub = function() {
   if (this.pubs.length) {

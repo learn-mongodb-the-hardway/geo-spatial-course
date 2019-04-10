@@ -215,6 +215,35 @@ describe("Crawl Model", () => {
       assert.equal(1, doc.attendants.length);
       assert(containFields(doc.attendants[0], ['_id', 'name', 'username', 'password', 'createdOn']))
     });
+
+    it('findOneByIdAttendantLocations', async () => {
+      const crawlId = ObjectId();
+      const userId = ObjectId();
+      const currentTimeMS = new Date().getTime();
+      await crawl.create(
+        crawlId, 'name', 'description', 'username200', new Date(currentTimeMS), new Date(currentTimeMS + 20000), true, [], {
+          attendants: [userId]
+        }
+      );
+
+      await user.create(
+        userId, 'peter', 'username200', 'peter', 'peter', {
+          location: {
+            type: 'Point', coordinates: [51.1, 10.1]
+          }
+        }
+      );
+
+      // Get the document
+      const doc = await crawl.findOneByIdAttendantLocations(crawlId);
+
+      // Assertions
+      assert.notEqual(null, doc);
+      assert.deepEqual(crawlId, doc._id);
+      assert.equal(1, doc.locations.length);
+      assert(containFields(doc, ['_id', 'locations']))
+      assert(containFields(doc.locations[0], ['_id', 'name', 'location']))
+    });
   });
 
   describe('update', async () => {
