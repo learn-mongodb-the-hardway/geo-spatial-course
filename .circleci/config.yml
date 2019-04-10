@@ -28,8 +28,7 @@ jobs:
       - store_test_results:
           path: test-results.xml
   deploy:
-    machine:
-      enable: true
+    machine: true
     working_directory: ~/geo-spatial-course
     steps:
       - deploy:
