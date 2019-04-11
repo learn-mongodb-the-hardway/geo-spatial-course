@@ -219,14 +219,18 @@ describe("Crawl Model", () => {
     it('findOneByIdAttendantLocations', async () => {
       const crawlId = ObjectId();
       const userId = ObjectId();
+      const userId2 = ObjectId();
       const currentTimeMS = new Date().getTime();
-      await crawl.create(
+      
+      var errors = await crawl.create(
         crawlId, 'name', 'description', 'username200', new Date(currentTimeMS), new Date(currentTimeMS + 20000), true, [], {
-          attendants: [userId]
+          attendants: [userId, userId2]
         }
       );
 
-      await user.create(
+      assert.equal(0, Object.keys(errors).length);
+
+      errors = await user.create(
         userId, 'peter', 'username200', 'peter', 'peter', {
           location: {
             type: 'Point', coordinates: [51.1, 10.1]
@@ -234,8 +238,20 @@ describe("Crawl Model", () => {
         }
       );
 
+      assert.equal(0, Object.keys(errors).length);
+
+      errors = await user.create(
+        userId2, 'peter2', 'username300', 'peter2', 'peter2', {
+          location: {
+            type: 'Point', coordinates: [51.1, 10.1]
+          }
+        }
+      );
+
+      assert.equal(0, Object.keys(errors).length);
+
       // Get the document
-      const doc = await crawl.findOneByIdAttendantLocations(crawlId);
+      const doc = await crawl.findOneByIdAttendantLocations(crawlId, userId2);
 
       // Assertions
       assert.notEqual(null, doc);
@@ -243,6 +259,7 @@ describe("Crawl Model", () => {
       assert.equal(1, doc.locations.length);
       assert(containFields(doc, ['_id', 'locations']))
       assert(containFields(doc.locations[0], ['_id', 'name', 'location']))
+      assert.deepEqual(userId, doc.locations[0]._id);
     });
   });
 
