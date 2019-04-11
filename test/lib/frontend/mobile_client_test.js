@@ -170,10 +170,7 @@ describe("PubCrawlClient", () => {
       }
 
       // Create a client
-      const client = new PubCrawlClient(leaflet, factory, browser, {
-        mapDivId: 'map',
-        accessToken: 'peterparker'
-      });
+      const client = new PubCrawlClient(leaflet, factory, browser);
 
       // Trigger result returned
       browser.getJSON = function(path, options, cb) {
@@ -191,9 +188,6 @@ describe("PubCrawlClient", () => {
 
       // Verify the mocks
       leafletMock.verify();
-
-      // Clear
-      clearInterval(client.intervalId);
     });
 
   });
