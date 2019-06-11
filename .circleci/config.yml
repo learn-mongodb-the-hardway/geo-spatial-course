@@ -29,11 +29,11 @@ jobs:
           path: test-results.xml
   deploy:
     machine: true
-    working_directory: ~/geo-spatial-course
+    working_directory: ~/coding/projects/geo-spatial-course
     steps:
       - deploy:
-          name: digital-ocean
-          command: ssh -o "StrictHostKeyChecking no" pubcrawl@134.209.65.161 "cd ~/geo-spatial-course; rm ~/geo-spatial-course/package-lock.json; git pull; npm install; npm restart"
+          name: hetzner
+          command: ssh -o "StrictHostKeyChecking no" christkv@95.217.58.149 "cd ~/coding/projects/geo-spatial-course; rm ~/coding/projects/geo-spatial-course/package-lock.json; git pull; npm install; npm restart"
 
 workflows:
   version: 2
