@@ -2,4 +2,4 @@
 Application, Data and other content related to Geo-Spatial Course
 
 
-contact us at
+contact us on email

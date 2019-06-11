@@ -5,7 +5,6 @@ const { mockRequest, mockResponse } = require('mock-req-res')
 const { JSDOM } = require("jsdom");
 const { User } = require('../../../lib/models/user');
 const { Crawl } = require('../../../lib/models/crawl');
-const moment = require('moment');
 const { waitOneTick } = require('../utils');
 
 // Check if env has been set
@@ -97,7 +96,8 @@ describe("/mobile/attendants Routes", () => {
 
   describe("/mobile/locations get", async () => {
 
-    it('render attendants locations list successfully', async () => {
+    it('render attendants locations list successfully', async () => {      
+      var doc = null;
       const crawlId = ObjectId();
       const firstAttendantId = ObjectId();
       const secondAttendantId = ObjectId();
@@ -118,47 +118,46 @@ describe("/mobile/attendants Routes", () => {
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {
         crawlId: crawlId
-      }, models: { crawl }, body: {}, session: {}, options: {}, baseUrl: '/admin', user: { _id: firstAttendantId }})
-      const res = mockResponse({ redirect: async function(url) {
-      }, send: function(string) {
+      }, models: { crawl }, user: { _id: firstAttendantId }})
+      const res = mockResponse({ send: function(string) {
         doc = JSON.parse(string);
       }});
 
       // Execute the indexGet
       await attendantsLocationsGetJSON(req, res)
-      await waitOneTick();
 
       // Just locate the document by name
       function findByName(name, locations) {
-        for (location of locations) {
+        for (let location of locations) {
           if (location.name == name) return location;
         }
       }
 
+      // Grab location
+      const location = findByName('petrus2 petrus2', doc.locations);
+
       // Do assertions
       assert.equal(1, doc.locations.length);
-      assert.equal('petrus2 petrus2', findByName('petrus2 petrus2', doc.locations).name);
-      assert.notEqual(null, findByName('petrus2 petrus2', doc.locations).location)
+      assert.notEqual(null, location.location)
       assert.deepEqual({
         type: 'Point', coordinates: [54.1, 11.1]
-      }, findByName('petrus2 petrus2', doc.locations).location)
+      }, location.location)
     });
 
-    it('no crawl exits', async () => {
+    it('locations no crawl exits', async () => {
+      var doc = null;
       const crawlId = ObjectId();
       
       // Prepare the mock request
       const req = mockRequest({ db: database, params: {
         crawlId: crawlId
-      }, models: { crawl }, body: {}, session: {}, options: {}, baseUrl: '/admin', user: { _id: new ObjectId() }})
-      const res = mockResponse({ redirect: async function(url) {
-      }, send: function(string) {
+      }, models: { crawl }, user: { _id: new ObjectId() }})
+      const res = mockResponse({ send: function(string) {
         doc = JSON.parse(string);
       }});
 
       // Execute the indexGet
       await attendantsLocationsGetJSON(req, res)
-      await waitOneTick();
 
       // Do assertions
       assert.deepEqual({ _id: crawlId.toString(), locations: [] }, doc);
