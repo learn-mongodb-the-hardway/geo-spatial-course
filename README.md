@@ -14,22 +14,59 @@ upstream rest_node_js {
     server  127.0.0.1:8080;
 }
 
+upstream qmplus_java {
+    server 127.0.0.1:8580;
+    server 127.0.0.1:8680;
+}
+
 server {
     listen [::]:443 ssl ipv6only=on; # managed by Certbot
     listen 443 ssl; # managed by Certbot
     server_name pubcrawl.live www.pubcrawl.live; # managed by Certbot
+    #server_name pubcrawl.live; # managed by Certbot
 
     ssl on;
     gzip on;
 
+    # ssl_certificate /root/.config/pubcrawl/live/pubcrawl.live/cert.pem;
+    # ssl_certificate_key /root/.config/pubcrawl/live/pubcrawl.live/privkey.pem;
     ssl_certificate /etc/letsencrypt/live/pubcrawl.live/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/pubcrawl.live/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
+    #ssl_stapling on;
+    #ssl_stapling_verify on;
+    #ssl_trusted_certificate /root/.config/pubcrawl/live/pubcrawl.live/fullchain.pem;
+
+    #ssl_session_timeout 5m;
+
     location / {
             proxy_pass http://rest_node_js;
             proxy_redirect off;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name qm.pubcrawl.live;
+    ssl on;
+    gzip on;
+    ssl_certificate /etc/letsencrypt/live/pubcrawl.live/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/pubcrawl.live/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+    auth_basic "Administrator Login";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location / {
+            proxy_pass http://qmplus_java;
+            proxy_redirect off;
+            proxy_set_header Host $host;
+	    proxy_set_header       Authorization "";
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }
 ```
