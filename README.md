@@ -15,8 +15,10 @@ upstream rest_node_js {
 }
 
 upstream qmplus_java {
+    ip_hash;
     server 127.0.0.1:8580;
     server 127.0.0.1:8680;
+    keepalive 8;
 }
 
 server {
@@ -62,9 +64,13 @@ server {
 
     location / {
             proxy_pass http://qmplus_java;
+
+            # This is necessary to pass the correct IP to be hashed
+            real_ip_header X-Real-IP;
+
             proxy_redirect off;
             proxy_set_header Host $host;
-	    proxy_set_header       Authorization "";
+	        proxy_set_header       Authorization "";
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
